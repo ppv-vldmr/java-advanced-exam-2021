@@ -6,9 +6,9 @@ public class Main {
     static BufferedWriter out;
     static void print(String str) throws IOException {
         if(out!=null) {
-            out.write(str);
+            out.write(str+"\n");
         } else {
-            System.out.println(str);
+            System.out.print(str);
         }
     }
 
@@ -28,13 +28,12 @@ public class Main {
                     map.forEach((ind, value) -> value.forEach(
                             it -> {
                                 try {
-                                    print(ind + " " + it + "\n");
+                                    print(ind + " " + it+"\n");
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
                             }
                     ));
-                    print("\n");
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + lexemes[0]);
             }
