@@ -65,11 +65,11 @@ public class Main {
                         out = writer;
                         run(reader);
                     } catch (IOException e) {
-                        System.err.println("Problems with output file");
+                        System.err.println("Problems with output file : ");
                         e.printStackTrace();
                     }
                 } catch (IOException e) {
-                    System.err.println("Problems with input file");
+                    System.err.println("Problems with input file : ");
                     e.printStackTrace();
                 }
             }
