@@ -3,7 +3,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Main {
-    public static void run(BufferedReader in, BufferedWriter out) throws IOException {
+    static BufferedWriter out;
+    static void print(String str) throws IOException {
+        if(out!=null) {
+            out.write(str);
+        } else {
+            System.out.println(str);
+        }
+    }
+
+    public static void run(BufferedReader in) throws IOException {
         String line;
         HashMap<Long, ArrayList<String>> map = new HashMap<>();
         while ((line = in.readLine()) != null) {
@@ -19,13 +28,13 @@ public class Main {
                     map.forEach((ind, value) -> value.forEach(
                             it -> {
                                 try {
-                                    out.write(ind + " " + it + "\n");
+                                    print(ind + " " + it + "\n");
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
                             }
                     ));
-                    out.newLine();
+                    print("\n");
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + lexemes[0]);
             }
@@ -35,15 +44,17 @@ public class Main {
     public static void main(String[] args) {
         switch (args.length) {
             case 0 -> {
-                //TODO
-            }
-            case 1 -> {
-                //TODO
+                try(BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+                        run(reader);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             case 2 -> {
                 try(BufferedReader reader = new BufferedReader(new FileReader(args[0]))) {
                     try(BufferedWriter writer = new BufferedWriter(new FileWriter(args[1]))) {
-                        run(reader,writer);
+                        out = writer;
+                        run(reader);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -51,7 +62,7 @@ public class Main {
                     e.printStackTrace();
                 }
             }
-            default -> System.err.println("Must be 2");
+            default -> System.err.println("Must be 2 or 0");
         }
     }
 
