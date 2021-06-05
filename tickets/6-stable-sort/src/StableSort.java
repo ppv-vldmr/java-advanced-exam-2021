@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Main {
+public class StableSort {
     static BufferedWriter out;
 
     static void print_err(String str) {
