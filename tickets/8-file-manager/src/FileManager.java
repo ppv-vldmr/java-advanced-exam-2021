@@ -1,5 +1,4 @@
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.*;
@@ -30,43 +29,45 @@ public class FileManager {
         }
     }
 
-
     void dir() {
-        Arrays.stream(Objects.requireNonNull(currentDir.toFile().list())).forEach(System.out::println);
+        try {
+            Arrays.stream(Objects.requireNonNull(currentDir.toFile().list())).forEach(System.out::println);
+        } catch (NullPointerException e){
+            System.err.format("Error occurred : \n%s\n",e.getMessage());
+        }
     }
 
     void rm(Path path) {
         try {
             Files.delete(path);
         } catch (NoSuchFileException e) {
-            System.err.format("File %s doesn't exist : \n%s\n",path.toString(),e.getCause());
+            System.err.format("File %s doesn't exist : \n%s\n", path.toString(), e.getCause());
         } catch (DirectoryNotEmptyException e) {
-            System.err.format("%s is directory : \n%s\n",path.toString(),e.getCause());
+            System.err.format("%s is directory : \n%s\n", path.toString(), e.getCause());
         } catch (IOException e) {
-            System.err.format("I/O error with file %s : \n%s\n",path.toString(),e.getCause());
+            System.err.format("I/O error with file %s : \n%s\n", path.toString(), e.getCause());
         }
     }
 
     void cd(Path path) {
-        if(Files.exists(currentDir.resolve(path))) {
-            if(Files.isDirectory(currentDir.resolve(path))){
+        if (Files.exists(currentDir.resolve(path))) {
+            if (Files.isDirectory(currentDir.resolve(path))) {
                 currentDir = currentDir.resolve(path);
             } else {
-                System.err.format("%s isn't directory\n",path.toString());
+                System.err.format("%s isn't directory\n", path.toString());
             }
         } else {
-            System.err.format("Directory %s doesn't exist\n",path.toString());
+            System.err.format("Directory %s doesn't exist\n", path.toString());
         }
-
     }
 
     void create(Path path) {
-        try{
+        try {
             Files.createFile(currentDir.resolve(path));
         } catch (FileAlreadyExistsException e) {
-            System.err.format("File/directory %s already exists : \n%s\n",path.toString(),e.getReason());
+            System.err.format("File/directory %s already exists : \n%s\n", path.toString(), e.getReason());
         } catch (IOException e) {
-            System.err.format("Parent directory of %s doesn't exist : \n%s\n",path.toString(),e.getCause());
+            System.err.format("Parent directory of %s doesn't exist : \n%s\n", path.toString(), e.getCause());
         }
     }
 
@@ -74,9 +75,9 @@ public class FileManager {
         try {
             Files.createDirectory(currentDir.resolve(path));
         } catch (FileAlreadyExistsException e) {
-            System.err.format("File/directory %s already exists : \n%s\n",path.toString(),e.getReason());
+            System.err.format("File/directory %s already exists : \n%s\n", path.toString(), e.getReason());
         } catch (IOException e) {
-            System.err.format("Parent directory of %s doesn't exist : \n%s\n",path.toString(),e.getCause());
+            System.err.format("Parent directory of %s doesn't exist : \n%s\n", path.toString(), e.getCause());
         }
     }
 
@@ -89,10 +90,10 @@ public class FileManager {
     }
 
     public void run() {
-        try(BufferedReader in = new BufferedReader(new InputStreamReader(System.in))) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(System.in))) {
             String line;
             String[] lexemes;
-            while((line = in.readLine()) != null) {
+            while ((line = in.readLine()) != null) {
                 lexemes = line.split(" ");
                 try {
                     switch (lexemes[0]) {
@@ -102,15 +103,16 @@ public class FileManager {
                         case "create" -> create(Paths.get(lexemes[1]));
                         case "mkdir" -> mkdir(Paths.get(lexemes[1]));
                         case "rmdir" -> rmdir(Paths.get(lexemes[1]));
-                        default -> System.err.format("Unsupported operation : %s\n",lexemes[0]);
+                        default -> System.err.format("Unsupported operation : %s\n", lexemes[0]);
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
                     System.err.format("must be more words\n");
                 } catch (InvalidPathException e) {
-                    System.err.format("Incorrect path : %s \n %s\n",lexemes[1],e.getReason());
+                    System.err.format("Incorrect path : %s \n %s\n", lexemes[1], e.getReason());
                 }
             }
         } catch (IOException e) {
+            System.err.println("Problems with input :");
             e.printStackTrace();
         }
     }
