@@ -1,9 +1,9 @@
-#Репозиторий для решения билетов по курсу Технологии программирования
+# Репозиторий для решения билетов по курсу Технологии программирования
 
 Ссылки:  
-[Банк билетов](https://disk.yandex.ru/i/K_nRL6NUflMRYA)
-[Табличка с распределением билетов](https://disk.yandex.ru/i/wiryl-VECrACmw)
-[Правила сдачи экзамена](https://docs.google.com/document/d/e/2PACX-1vSN52k6vkuNNLXy_fZzCNShg5i5tyRKQ0BLqXTDnAH5g4xGk8HTZbyObjPuRsBHB8NOBE_lxgcZfQ15/pub)
+* [Банк билетов](https://disk.yandex.ru/i/K_nRL6NUflMRYA)
+* [Табличка с распределением билетов](https://disk.yandex.ru/i/wiryl-VECrACmw)
+* [Правила сдачи экзамена](https://docs.google.com/document/d/e/2PACX-1vSN52k6vkuNNLXy_fZzCNShg5i5tyRKQ0BLqXTDnAH5g4xGk8HTZbyObjPuRsBHB8NOBE_lxgcZfQ15/pub)
 
 # ОБЯЗАТЕЛЬНО К ПРОЧТЕНИЮ  
 Папка `tickets` содержит решения различных билетов.
