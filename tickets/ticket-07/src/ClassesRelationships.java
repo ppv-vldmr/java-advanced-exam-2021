@@ -5,99 +5,143 @@ public class ClassesRelationships {
 
     private static Class<?> aClass;
     private static Class<?> bClass;
-    private static boolean same, samePkg;
     private static String ancestor;
-    private static String commonInterfaces, commonClasses;
+
+    //только для тестирования
+    //TODO: при посылке кода убрать все взаимодействия с logger
+    static StringBuilder logger = new StringBuilder();
+
+    public static void main(String[] args) {
+
+        if (args == null || args.length != 1 || args[0] == null) {
+            logger.append("Expected 1 non-null argument: <inputFile.name>");
+            System.out.println("Expected 1 non-null argument: <inputFile.name>");
+            return;
+        }
+
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(args[0]));
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                String[] classes = line.split(" ");
+                aClass = Class.forName(classes[0]);
+                bClass = Class.forName(classes[1]);
+                globalCheck();
+            }
+        } catch (FileNotFoundException e) {
+            logger.append("Input file ").append(args[0]).append(" not found.").append(e.getMessage());
+            System.out.println("Input file " + args[0] + " not found." + e.getMessage());
+        } catch (IOException e) {
+            logger.append("Error occurred during reading input file.").append(e.getMessage());
+            System.out.println("Error occurred during reading input file." + e.getMessage());
+        } catch (ClassNotFoundException e) {
+            logger.append("Error occurred during searching class.").append(e.getMessage());
+            System.out.println("Error occurred during searching class." + e.getMessage());
+        }
+    }
+
+    private static void globalCheck() throws ClassNotFoundException {
+        System.out.printf("===== Check %s and %s =====%n", aClass.getCanonicalName(), bClass.getCanonicalName());
+        ancestor = "";
+        checkCoincidence();
+        checkSamePackages();
+        findAncestor();
+        findCommonAncestor();
+        System.out.println();
+    }
 
     private static void checkCoincidence() {
-        same = aClass.getCanonicalName().equals(bClass.getCanonicalName());
-        if (same) {
+        if (aClass.getCanonicalName().equals(bClass.getCanonicalName())) {
+            logger.append("Classes are the same (coincidence)\n");
             System.out.println("Classes are the same (coincidence)");
+        } else {
+            logger.append("Classes are different\n");
+            System.out.println("Classes are different");
         }
     }
 
     private static void checkSamePackages() {
-        if (!same) {
-            samePkg = aClass.getPackage().equals(bClass.getPackage());
-            if (samePkg) {
-                System.out.println("Classes have the same package");
+        if (aClass.getPackage().equals(bClass.getPackage())) {
+            logger.append("Classes have the same package\n");
+            System.out.println("Classes have the same package");
+        } else {
+            logger.append("Classes have different packages\n");
+            System.out.println("Classes have different packages");
+        }
+    }
+
+    private static void findAncestor() throws ClassNotFoundException {
+        setAncestor(aClass, bClass, findAncestorInterface(aClass, bClass));
+        setAncestor(bClass, aClass, findAncestorInterface(bClass, aClass));
+        setAncestor(aClass, bClass, findAncestorClass(aClass, bClass));
+        setAncestor(bClass, aClass, findAncestorClass(bClass, aClass));
+        if (ancestor.isEmpty()) {
+            logger.append("No one is ancestor of ").append(aClass.getCanonicalName()).append(" and ").append(bClass.getCanonicalName()).append("\n");
+            System.out.println("No one is ancestor of " + aClass.getCanonicalName() + " and " + bClass.getCanonicalName());
+        }
+    }
+
+    private static void setAncestor(Class<?> a, Class<?> b, String classOrInterface) {
+        if (ancestor.isEmpty()) {
+            ancestor = classOrInterface;
+            if (!ancestor.isEmpty()) {
+                logger.append(b.getCanonicalName()).append(" is ancestor of ").append(a.getCanonicalName()).append("\n");
+                System.out.println(b.getCanonicalName() + " is ancestor of " + a.getCanonicalName());
             }
         }
     }
 
-
-    private static void checkAncestor() throws ClassNotFoundException {
-        if (!same) {
-            if (ancestor.equals("") || ancestor.equals("#ERROR")) {
-                ancestor = checkAncestorInterface(aClass, bClass);
-                if (!ancestor.equals("") && !ancestor.equals("#ERROR")) {
-                    System.out.println(bClass + " is ancestor of " + aClass);
-                }
-            }
-            if (ancestor.equals("") || ancestor.equals("#ERROR")) {
-                ancestor = checkAncestorClass(aClass, bClass);
-                if (!ancestor.equals("") && !ancestor.equals("#ERROR")) {
-                    System.out.println(bClass + " is ancestor of " + aClass);
-                }
-            }
-            if (ancestor.equals("") || ancestor.equals("#ERROR")) {
-                ancestor = checkAncestorInterface(bClass, aClass);
-                if (!ancestor.equals("") && !ancestor.equals("#ERROR")) {
-                    System.out.println(aClass + " is ancestor of " + bClass);
-                }
-            }
-            if (ancestor.equals("") || ancestor.equals("#ERROR")) {
-                ancestor = checkAncestorClass(bClass, aClass);
-                if (!ancestor.equals("") && !ancestor.equals("#ERROR")) {
-                    System.out.println(aClass + " is ancestor of " + bClass);
-                }
-            }
-            if (ancestor.equals("") || ancestor.equals("#ERROR")) {
-                System.out.println("No one is ancestor of " + aClass.getCanonicalName() + " and " + bClass.getCanonicalName());
+    private static String findAncestorInterface(Class<?> a, Class<?> b) throws ClassNotFoundException {
+        AnnotatedType[] annotatedInterfaces = a.getAnnotatedInterfaces();
+        for (AnnotatedType annotatedType : annotatedInterfaces) {
+            Class<?> cur = convertAnnotatedTypeToClass(annotatedType);
+            if (cur.getCanonicalName().equals(b.getCanonicalName())) {
+                return cur.getCanonicalName();
             }
         }
+        for (AnnotatedType annotatedType : annotatedInterfaces) {
+            String ans = findAncestorInterface(convertAnnotatedTypeToClass(annotatedType), b);
+            if (!ans.isEmpty()) {
+                return ans;
+            }
+        }
+        return "";
     }
-
-    private static String checkAncestorClass(Class<?> a, Class<?> b) throws ClassNotFoundException {
+    
+    private static String findAncestorClass(Class<?> a, Class<?> b) throws ClassNotFoundException {
         AnnotatedType annotatedType = a.getAnnotatedSuperclass();
         if (annotatedType != null) {
             Class<?> superClass = convertAnnotatedTypeToClass(annotatedType);
             if (superClass.getCanonicalName().equals(b.getCanonicalName())) {
                 return superClass.getCanonicalName();
             } else {
-                return checkAncestorClass(superClass, b);
+                return findAncestorClass(superClass, b);
             }
         } else {
-            return "#ERROR";
+            return "";
         }
-    }
-
-    private static String checkAncestorInterface(Class<?> a, Class<?> b) throws ClassNotFoundException {
-        AnnotatedType[] superClasses = a.getAnnotatedInterfaces();
-        for (AnnotatedType annotatedType : superClasses) {
-            Class<?> cur = convertAnnotatedTypeToClass(annotatedType);
-            if (cur.getCanonicalName().equals(b.getCanonicalName())) {
-                return cur.getCanonicalName();
-            }
-        }
-        for (AnnotatedType annotatedType : superClasses) {
-            String ans = checkAncestorInterface(convertAnnotatedTypeToClass(annotatedType), b);
-            if (!ans.equals("#ERROR")) {
-                return ans;
-            }
-        }
-        return "#ERROR";
     }
 
     private static Class<?> convertAnnotatedTypeToClass(AnnotatedType annotatedType) throws ClassNotFoundException {
-        int pos = !annotatedType.getType().getTypeName().contains("<") ? annotatedType.getType().getTypeName().length() : annotatedType.getType().getTypeName().indexOf("<");
-        return Class.forName(annotatedType.getType().getTypeName().substring(0, pos));
+        int typeParameterPosition;
+        if (!annotatedType.getType().getTypeName().contains("<")) {
+            typeParameterPosition = annotatedType.getType().getTypeName().length();
+        } else {
+            typeParameterPosition = annotatedType.getType().getTypeName().indexOf("<");
+        }
+        return Class.forName(annotatedType.getType().getTypeName().substring(0, typeParameterPosition));
     }
 
-    private static void findCommonInterfaces() throws ClassNotFoundException {
+    private static void findCommonAncestor() throws ClassNotFoundException {
+        findCommonAncestorInterfaces();
+        findCommonAncestorClasses();
+    }
+
+    private static void findCommonAncestorInterfaces() throws ClassNotFoundException {
         StringBuilder ans = new StringBuilder();
-        String[] interfacesA = findAllInterfaces(aClass).split(" ");
-        String[] interfacesB = findAllInterfaces(bClass).split(" ");
+        String[] interfacesA = findAllAncestorInterfaces(aClass).split(" ");
+        String[] interfacesB = findAllAncestorInterfaces(bClass).split(" ");
+
         for (String fromA : interfacesA) {
             for (String fromB : interfacesB) {
                 if (fromA.equals(fromB) && !ans.toString().contains(fromA)) {
@@ -105,48 +149,15 @@ public class ClassesRelationships {
                 }
             }
         }
-        commonInterfaces = ans.toString();
-        if (commonInterfaces.split(" ").length == 0) {
-            System.out.println("No common interfaces");
-        } else {
-            System.out.println("Common interfaces: " + commonInterfaces);
-        }
+      
+        commonOutput("interfaces", ans);
     }
 
-    private static String findAllInterfaces(Class<?> a) throws ClassNotFoundException {
-        StringBuilder res = new StringBuilder();
-        AnnotatedType[] superClasses = a.getAnnotatedInterfaces();
-        for (AnnotatedType annotatedType : superClasses) {
-            Class<?> cur = convertAnnotatedTypeToClass(annotatedType);
-            res.append(cur.getCanonicalName()).append(" ");
-        }
-        for (AnnotatedType annotatedType : superClasses) {
-            Class<?> cur = convertAnnotatedTypeToClass(annotatedType);
-            res.append(findAllInterfaces(cur));
-        }
-        return res.toString();
-    }
-
-    private static String findAllClasses(Class<?> a) throws ClassNotFoundException {
-        StringBuilder res = new StringBuilder();
-        AnnotatedType superClass = a.getAnnotatedSuperclass();
-        if (superClass == null) {
-            return "";
-        }
-        Class<?> cur = convertAnnotatedTypeToClass(superClass);
-        res.append(cur.getCanonicalName()).append(" ").append(findAllClasses(cur));
-        return res.toString();
-    }
-
-    private static void findCommonAncestor() throws ClassNotFoundException {
-        findCommonInterfaces();
-        findCommonClasses();
-    }
-
-    private static void findCommonClasses() throws ClassNotFoundException {
+    private static void findCommonAncestorClasses() throws ClassNotFoundException {
         StringBuilder ans = new StringBuilder();
-        String[] classesA = findAllClasses(aClass).split(" ");
-        String[] classesB = findAllClasses(bClass).split(" ");
+        String[] classesA = findAllAncestorClasses(aClass).split(" ");
+        String[] classesB = findAllAncestorClasses(bClass).split(" ");
+
         for (String fromA : classesA) {
             for (String fromB : classesB) {
                 if (fromA.equals(fromB) && !ans.toString().contains(fromA)) {
@@ -154,42 +165,42 @@ public class ClassesRelationships {
                 }
             }
         }
-        commonClasses = ans.toString();
-        if (commonClasses.split(" ").length == 0) {
-            System.out.println("No common classes");
+
+        commonOutput("classes", ans);
+    }
+
+    private static void commonOutput(String classOrInterface, StringBuilder result) {
+        if (result.toString().isEmpty()) {
+            logger.append("No common ").append(classOrInterface).append("\n");
+            System.out.println("No common " + classOrInterface);
         } else {
-            System.out.println("Common classes: " + commonClasses);
+            logger.append("Common ").append(classOrInterface).append(": ").append(result.toString()).append("\n");
+            System.out.println("Common " + classOrInterface + ": " + result.toString());
         }
     }
 
-    private static void globalCheck() throws ClassNotFoundException {
-        checkCoincidence();
-        checkSamePackages();
-        checkAncestor();
-        findCommonAncestor();
+    private static String findAllAncestorInterfaces(Class<?> a) throws ClassNotFoundException {
+        StringBuilder res = new StringBuilder();
+        AnnotatedType[] annotatedClasses = a.getAnnotatedInterfaces();
+        for (AnnotatedType annotatedType : annotatedClasses) {
+            Class<?> cur = convertAnnotatedTypeToClass(annotatedType);
+            res.append(cur.getCanonicalName()).append(" ");
+        }
+        for (AnnotatedType annotatedType : annotatedClasses) {
+            Class<?> cur = convertAnnotatedTypeToClass(annotatedType);
+            res.append(findAllAncestorInterfaces(cur));
+        }
+        return res.toString();
     }
 
-    public static void main(String[] args) {
-        if (args == null || args.length != 1 || args[0] == null) {
-            System.out.println("Expected 1 non-null argument: <inputFile.name>");
-            return;
+    private static String findAllAncestorClasses(Class<?> a) throws ClassNotFoundException {
+        StringBuilder res = new StringBuilder();
+        AnnotatedType superClass = a.getAnnotatedSuperclass();
+        if (superClass == null) {
+            return "";
         }
-        same = samePkg = false;
-        ancestor = "";
-        commonInterfaces = "";
-        commonClasses = "";
-        try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(args[0]));
-            String[] classes = bufferedReader.readLine().split(" ");
-            aClass = Class.forName(classes[0]);
-            bClass = Class.forName(classes[1]);
-            globalCheck();
-        } catch (FileNotFoundException e) {
-            System.out.println("Input file " + args[0] + " not found." + e.getMessage());
-        } catch (IOException e) {
-            System.out.println("Error occurred during reading input file." + e.getMessage());
-        } catch (ClassNotFoundException e) {
-            System.out.println("Error occurred during searching class." + e.getMessage());
-        }
+        Class<?> cur = convertAnnotatedTypeToClass(superClass);
+        res.append(cur.getCanonicalName()).append(" ").append(findAllAncestorClasses(cur));
+        return res.toString();
     }
 }
