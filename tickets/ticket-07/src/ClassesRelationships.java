@@ -149,7 +149,7 @@ public class ClassesRelationships {
                 }
             }
         }
-
+      
         commonOutput("interfaces", ans);
     }
 
