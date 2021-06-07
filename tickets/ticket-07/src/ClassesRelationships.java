@@ -7,9 +7,14 @@ public class ClassesRelationships {
     private static Class<?> bClass;
     private static String ancestor;
 
+    //только для тестирования
+    //TODO: при посылке кода убрать все взаимодействия с logger
+    static StringBuilder logger = new StringBuilder();
+
     public static void main(String[] args) {
 
         if (args == null || args.length != 1 || args[0] == null) {
+            logger.append("Expected 1 non-null argument: <inputFile.name>");
             System.out.println("Expected 1 non-null argument: <inputFile.name>");
             return;
         }
@@ -24,10 +29,13 @@ public class ClassesRelationships {
                 globalCheck();
             }
         } catch (FileNotFoundException e) {
+            logger.append("Input file ").append(args[0]).append(" not found.").append(e.getMessage());
             System.out.println("Input file " + args[0] + " not found." + e.getMessage());
         } catch (IOException e) {
+            logger.append("Error occurred during reading input file.").append(e.getMessage());
             System.out.println("Error occurred during reading input file." + e.getMessage());
         } catch (ClassNotFoundException e) {
+            logger.append("Error occurred during searching class.").append(e.getMessage());
             System.out.println("Error occurred during searching class." + e.getMessage());
         }
     }
@@ -44,16 +52,20 @@ public class ClassesRelationships {
 
     private static void checkCoincidence() {
         if (aClass.getCanonicalName().equals(bClass.getCanonicalName())) {
+            logger.append("Classes are the same (coincidence)\n");
             System.out.println("Classes are the same (coincidence)");
         } else {
+            logger.append("Classes are different\n");
             System.out.println("Classes are different");
         }
     }
 
     private static void checkSamePackages() {
         if (aClass.getPackage().equals(bClass.getPackage())) {
+            logger.append("Classes have the same package\n");
             System.out.println("Classes have the same package");
         } else {
+            logger.append("Classes have different packages\n");
             System.out.println("Classes have different packages");
         }
     }
@@ -64,6 +76,7 @@ public class ClassesRelationships {
         setAncestor(aClass, bClass, findAncestorClass(aClass, bClass));
         setAncestor(bClass, aClass, findAncestorClass(bClass, aClass));
         if (ancestor.isEmpty()) {
+            logger.append("No one is ancestor of ").append(aClass.getCanonicalName()).append(" and ").append(bClass.getCanonicalName()).append("\n");
             System.out.println("No one is ancestor of " + aClass.getCanonicalName() + " and " + bClass.getCanonicalName());
         }
     }
@@ -72,6 +85,7 @@ public class ClassesRelationships {
         if (ancestor.isEmpty()) {
             ancestor = classOrInterface;
             if (!ancestor.isEmpty()) {
+                logger.append(b.getCanonicalName()).append(" is ancestor of ").append(a.getCanonicalName()).append("\n");
                 System.out.println(b.getCanonicalName() + " is ancestor of " + a.getCanonicalName());
             }
         }
@@ -157,8 +171,10 @@ public class ClassesRelationships {
 
     private static void commonOutput(String classOrInterface, StringBuilder result) {
         if (result.toString().isEmpty()) {
+            logger.append("No common ").append(classOrInterface).append("\n");
             System.out.println("No common " + classOrInterface);
         } else {
+            logger.append("Common ").append(classOrInterface).append(": ").append(result.toString()).append("\n");
             System.out.println("Common " + classOrInterface + ": " + result.toString());
         }
     }
