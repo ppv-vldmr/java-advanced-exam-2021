@@ -153,3 +153,5 @@ __Запрещается__ мерджить с главной веткой.
 - [Билет 32. Java Shell](https://github.com/ppv-vldmr/java-advanced-exam-2021/tree/master/tickets/ticket-32)
 - [Билет 33. Протоколирование](https://github.com/ppv-vldmr/java-advanced-exam-2021/tree/master/tickets/ticket-33)
 - [Билет 34. Конвертация файла](https://github.com/ppv-vldmr/java-advanced-exam-2021/tree/master/tickets/ticket-34)
+- [Билет 35. Система Лейтнера](https://github.com/ppv-vldmr/java-advanced-exam-2021/tree/master/tickets/ticket-35)
+- [Билет 36. Мат ладьей и королем](https://github.com/ppv-vldmr/java-advanced-exam-2021/tree/master/tickets/ticket-36)
