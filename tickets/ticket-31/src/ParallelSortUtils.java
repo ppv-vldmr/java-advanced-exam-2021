@@ -27,10 +27,10 @@ public class ParallelSortUtils {
     }
 
     public static <E> void parallelQuickSort(final int threads, final List<E> sortedList) {
-        parallelQuickSort(threads, null, sortedList);
+        parallelQuickSort(threads, sortedList, null);
     }
 
-    public static <E> void parallelQuickSort(final int threads, final Comparator<? super E> comparator, final List<E> sortedList) {
+    public static <E> void parallelQuickSort(final int threads, final List<E> sortedList, final Comparator<? super E> comparator) {
         final ExecutorService executorService = Executors.newFixedThreadPool(threads);
         shallower(executorService, sortedList, comparator, 0, sortedList.size() - 1);
         shutdownAndAwaitTermination(executorService);
@@ -40,6 +40,7 @@ public class ParallelSortUtils {
         try {
             parallelQuickSort(executorService, sortedList, comparator, l, r);
         } catch (final ExecutionException | InterruptedException e) {
+            e.printStackTrace();
             shutdownAndAwaitTermination(executorService);
         }
     }
@@ -98,13 +99,15 @@ public class ParallelSortUtils {
             final int mid = partition(list, comparator, l, r);
             final Future<Void> future;
             if (mid < (l + r) / 2) {
-                parallelQuickSort(executorService, list, comparator, mid + 1, r);
                 future = (Future<Void>) executorService.submit(() -> shallower(executorService, list, comparator, l, mid));
+                future.get();
+                parallelQuickSort(executorService, list, comparator, mid + 1, r);
             } else {
-                parallelQuickSort(executorService, list, comparator, l, mid);
                 future = (Future<Void>) executorService.submit(() -> shallower(executorService, list, comparator, mid + 1, r));
+                future.get();
+                parallelQuickSort(executorService, list, comparator, l, mid);
             }
-            future.get();
+//            future.get();
         }
 
     }
