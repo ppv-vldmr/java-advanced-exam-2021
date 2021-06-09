@@ -23,6 +23,7 @@ public class FileManager {
 
     private void dir(PrintStream out, PrintStream err) {
         try {
+            out.format("Current dir : %s\n",currentDir.toString());
             Arrays.stream(Objects.requireNonNull(currentDir.toFile().list())).forEach(out::println);
         } catch (NullPointerException e) {
             err.format("Error occurred : \n%s\n", e.getMessage());
@@ -31,9 +32,10 @@ public class FileManager {
 
     void rm(Path path, PrintStream out, PrintStream err) {
         try {
-            Files.delete(path);
+            Files.delete(currentDir.resolve(path));
+            out.format("File %s deleted\n",path.toString());
         } catch (NoSuchFileException e) {
-            err.format("File %s doesn't exist : \n%s\n", path.toString(), e.getCause());
+            err.format("File %s doesn't exist : \n%s\n", path.toString(), e.getMessage());
         } catch (DirectoryNotEmptyException e) {
             err.format("%s is directory : \n%s\n", path.toString(), e.getMessage());
         } catch (IOException e) {
@@ -44,7 +46,8 @@ public class FileManager {
     void cd(Path path, PrintStream out, PrintStream err) {
         if (Files.exists(currentDir.resolve(path))) {
             if (Files.isDirectory(currentDir.resolve(path))) {
-                currentDir = currentDir.resolve(path);
+                currentDir = currentDir.resolve(path).normalize();
+                out.format("Current directory changed to %s\n",path.toString());
             } else {
                 err.format("%s isn't directory\n", path.toString());
             }
@@ -56,6 +59,7 @@ public class FileManager {
     void create(Path path, PrintStream out, PrintStream err) {
         try {
             Files.createFile(currentDir.resolve(path));
+            out.format("File %s created\n",path.toString());
         } catch (FileAlreadyExistsException e) {
             err.format("File/directory %s already exists : \n%s\n", path.toString(), e.getReason());
         } catch (IOException e) {
@@ -66,6 +70,7 @@ public class FileManager {
     void mkdir(Path path, PrintStream out, PrintStream err) {
         try {
             Files.createDirectory(currentDir.resolve(path));
+            out.format("Directory %s created\n",path.toString());
         } catch (FileAlreadyExistsException e) {
             err.format("File/directory %s already exists : \n%s\n", path.toString(), e.getReason());
         } catch (IOException e) {
@@ -76,6 +81,7 @@ public class FileManager {
     void rmdir(Path path, PrintStream out, PrintStream err) {
         try {
             Files.walkFileTree(currentDir.resolve(path), DELETE);
+            out.format("Directory %s deleted\n",path.toString());
         } catch (IOException e) {
             err.println(e.getMessage());
         }
