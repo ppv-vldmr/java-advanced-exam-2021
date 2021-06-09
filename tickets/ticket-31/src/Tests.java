@@ -71,13 +71,13 @@ public class Tests {
     @SuppressWarnings("unchecked")
     public void test_05_big_test() {
         final ArrayList<Integer> list = new ArrayList<>();
-        for (int i = 1; i <= 40; i++) {
+        for (int i = 1; i <= 31; i++) {
             list.add(i);
         }
         final List<Integer> sortList = (List<Integer>) list.clone();
         Collections.shuffle(list);
 
-        ParallelSortUtils.parallelQuickSort(10, list);
+        ParallelSortUtils.parallelQuickSort(5, list);
         base_test(list, sortList);
     }
 }

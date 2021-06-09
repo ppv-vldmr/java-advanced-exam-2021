@@ -38,6 +38,7 @@ public class ParallelSortUtils {
 
     private static <E> void shallower(final ExecutorService executorService, final List<E> sortedList, final Comparator<? super E> comparator, final int l, final int r) {
         try {
+            System.out.println(l + " " + r);
             parallelQuickSort(executorService, sortedList, comparator, l, r);
         } catch (final ExecutionException | InterruptedException e) {
             e.printStackTrace();
@@ -100,14 +101,18 @@ public class ParallelSortUtils {
             final Future<Void> future;
             if (mid < (l + r) / 2) {
                 future = (Future<Void>) executorService.submit(() -> shallower(executorService, list, comparator, l, mid));
-                future.get();
                 parallelQuickSort(executorService, list, comparator, mid + 1, r);
             } else {
-                future = (Future<Void>) executorService.submit(() -> shallower(executorService, list, comparator, mid + 1, r));
-                future.get();
                 parallelQuickSort(executorService, list, comparator, l, mid);
+                future = (Future<Void>) executorService.submit(() -> shallower(executorService, list, comparator, mid + 1, r));
             }
-//            future.get();
+            try {
+
+                future.get(1000, TimeUnit.SECONDS);
+            } catch (final Exception ex) {
+                ex.printStackTrace();
+            }
+
         }
 
     }
