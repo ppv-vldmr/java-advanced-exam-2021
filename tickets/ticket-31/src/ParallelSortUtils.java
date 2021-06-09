@@ -4,9 +4,29 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 
 public class ParallelSortUtils {
+
+
+    private static void shutdownAndAwaitTermination(final ExecutorService pool) {
+        pool.shutdown(); // Disable new tasks from being submitted
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
+                pool.shutdownNow(); // Cancel currently executing tasks
+                // Wait a while for tasks to respond to being cancelled
+                if (!pool.awaitTermination(60, TimeUnit.SECONDS))
+                    System.err.println("Pool did not terminate");
+            }
+        } catch (final InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
+            pool.shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
+    }
 
 
     public static <E> void parallelQuickSort(final int threads, final List<E> sortedList) {
@@ -16,7 +36,7 @@ public class ParallelSortUtils {
     public static <E> void parallelQuickSort(final int threads, final Comparator<? super E> comparator, final List<E> sortedList) {
         final ExecutorService executorService = Executors.newFixedThreadPool(threads);
         parallelQuickSort(executorService, sortedList, comparator, 0, sortedList.size() - 1);
-        executorService.shutdown();
+        shutdownAndAwaitTermination(executorService);
     }
 
     private static <E> E getMedian(final List<E> list, final Comparator<? super E> comparator, final int l, final int r) {
