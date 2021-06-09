@@ -1,9 +1,13 @@
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.jupiter.api.*;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class StableSortTest {
@@ -22,9 +26,19 @@ class StableSortTest {
         for(String comm : commands) fileWriter.write(comm+"\n");
         fileWriter.close();
         StableSort.main(new String[]{"test.in","test.out"});
-        Stream<String> reality = Files.lines(Path.of("test.out"));
-
+        Files.delete(fileTest);
+        ArrayList<String> realityList = new ArrayList<>();
+        Files.lines(Path.of("test.out")).forEach(realityList::add);
+        String[] expected = new String[]{
+                "-----START-----",
+                "------END------",
+                "-----START-----",
+                "0 aaa",
+                "1 ccc",
+                "1 aaa",
+                "2 bb",
+                "------END------"
+        };
+        Assertions.assertArrayEquals(realityList.toArray(),expected);
     }
 }
-
-//Generated with love by TestMe :) Please report issues and submit feature requests at: http://weirddev.com/forum#!/testme
