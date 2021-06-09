@@ -1,11 +1,14 @@
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.jupiter.api.*;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class StableSortTest {
     @Test
@@ -26,7 +29,6 @@ class StableSortTest {
         Files.delete(fileTest);
         ArrayList<String> realityList = new ArrayList<>();
         Files.lines(Path.of("test.out")).forEach(realityList::add);
-        Files.delete(Path.of("test.out"));
         String[] expected = new String[]{
                 "-----START-----",
                 "------END------",
