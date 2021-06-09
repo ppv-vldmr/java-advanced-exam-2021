@@ -5,17 +5,17 @@ import java.util.HashMap;
 public class StableSort {
     public static void run(BufferedReader in, PrintStream out, PrintStream err) throws IOException {
         String line;
-        HashMap<Long, ArrayList<String>> map = new HashMap<>();
+        HashMap<Integer, ArrayList<String>> map = new HashMap<>();
         while ((line = in.readLine()) != null) {
             String[] lexemes = line.split(" ");
             try {
                 switch (lexemes[0]) {
                     case "add" -> {
-                        Long ind = Long.parseLong(lexemes[1]);
+                        Integer ind = Integer.parseInt(lexemes[1]);
                         map.putIfAbsent(ind, new ArrayList<>());
                         map.get(ind).add(lexemes[2]);
                     }
-                    case "remove" -> map.remove(Long.parseLong(lexemes[1]));
+                    case "remove" -> map.remove(Integer.parseInt(lexemes[1]));
                     case "print" -> {
                         out.println("-----START-----");
                         map.forEach((ind, value) -> value.forEach(it -> out.println(ind + " " + it)));
