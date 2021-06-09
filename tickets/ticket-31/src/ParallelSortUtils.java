@@ -2,9 +2,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 
 public class ParallelSortUtils {
@@ -28,15 +26,22 @@ public class ParallelSortUtils {
         }
     }
 
-
     public static <E> void parallelQuickSort(final int threads, final List<E> sortedList) {
         parallelQuickSort(threads, null, sortedList);
     }
 
     public static <E> void parallelQuickSort(final int threads, final Comparator<? super E> comparator, final List<E> sortedList) {
         final ExecutorService executorService = Executors.newFixedThreadPool(threads);
-        parallelQuickSort(executorService, sortedList, comparator, 0, sortedList.size() - 1);
+        shallower(executorService, sortedList, comparator, 0, sortedList.size() - 1);
         shutdownAndAwaitTermination(executorService);
+    }
+
+    private static <E> void shallower(final ExecutorService executorService, final List<E> sortedList, final Comparator<? super E> comparator, final int l, final int r) {
+        try {
+            parallelQuickSort(executorService, sortedList, comparator, l, r);
+        } catch (final ExecutionException | InterruptedException e) {
+            shutdownAndAwaitTermination(executorService);
+        }
     }
 
     private static <E> E getMedian(final List<E> list, final Comparator<? super E> comparator, final int l, final int r) {
@@ -53,6 +58,7 @@ public class ParallelSortUtils {
         return tmp_list.get(1);
     }
 
+    @SuppressWarnings("unchecked")
     private static <E> int compareElements(final E a, final E b, final Comparator<? super E> comparator) {
         if (comparator == null) {
             return ((Comparable<? super E>) a).compareTo(b);
@@ -83,19 +89,22 @@ public class ParallelSortUtils {
         return j;
     }
 
+    @SuppressWarnings("unchecked")
     private static <E> void parallelQuickSort(final ExecutorService executorService,
                                               final List<E> list,
                                               final Comparator<? super E> comparator,
-                                              final int l, final int r) {
-        if (l < r) {
+                                              final int l, final int r) throws ExecutionException, InterruptedException {
+        if (l < r && !executorService.isShutdown()) {
             final int mid = partition(list, comparator, l, r);
+            final Future<Void> future;
             if (mid < (l + r) / 2) {
-                executorService.execute(() -> parallelQuickSort(executorService, list, comparator, l, mid));
                 parallelQuickSort(executorService, list, comparator, mid + 1, r);
+                future = (Future<Void>) executorService.submit(() -> shallower(executorService, list, comparator, l, mid));
             } else {
                 parallelQuickSort(executorService, list, comparator, l, mid);
-                executorService.execute(() -> parallelQuickSort(executorService, list, comparator, mid + 1, r));
+                future = (Future<Void>) executorService.submit(() -> shallower(executorService, list, comparator, mid + 1, r));
             }
+            future.get();
         }
 
     }
