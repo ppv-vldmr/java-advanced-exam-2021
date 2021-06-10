@@ -30,8 +30,12 @@ public class QuickSortTask<E> extends RecursiveAction {
     protected void compute() {
         if (l < r) {
             final int mid = partition();
-            invokeAll(new QuickSortTask<>(list, comparator, l, mid), new QuickSortTask<>(list, comparator, mid + 1, r));
+            invokeAll(newTask(l, mid), newTask(mid + 1, r));
         }
+    }
+
+    private QuickSortTask<E> newTask(final int l, final int r) {
+        return new QuickSortTask<>(list, comparator, l, r);
     }
 
     @SuppressWarnings("unchecked")

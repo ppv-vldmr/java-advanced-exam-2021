@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static java.util.Comparator.comparing;
-
 public class Tests {
 
     private <E> void check_equals(final List<E> list, final List<E> sortList) {
@@ -86,5 +84,10 @@ public class Tests {
     @Test
     public void test_06_very_big_test() {
         big_test(1000_000, 10);
+    }
+
+    @Test
+    public void test_07_very_big_test_one_thread() {
+        big_test(1000_000, 1);
     }
 }
