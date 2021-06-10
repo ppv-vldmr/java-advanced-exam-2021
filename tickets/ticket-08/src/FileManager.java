@@ -69,7 +69,7 @@ public class FileManager {
 
     void mkdir(Path path, PrintStream out, PrintStream err) {
         try {
-            Files.createDirectory(currentDir.resolve(path));
+            Files.createDirectories(currentDir.resolve(path));
             out.format("Directory %s created$n",path.toString());
         } catch (FileAlreadyExistsException e) {
             err.format("File/directory %s already exists : $n%s$n", path.toString(), e.getReason());
