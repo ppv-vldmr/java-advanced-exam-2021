@@ -23,23 +23,23 @@ public class FileManager {
 
     private void dir(PrintStream out, PrintStream err) {
         try {
-            out.format("Current dir : %s\n",currentDir.toString());
+            out.format("Current dir : %s$n",currentDir.toString());
             Arrays.stream(Objects.requireNonNull(currentDir.toFile().list())).forEach(out::println);
         } catch (NullPointerException e) {
-            err.format("Error occurred : \n%s\n", e.getMessage());
+            err.format("Error occurred : $n%s$n", e.getMessage());
         }
     }
 
     void rm(Path path, PrintStream out, PrintStream err) {
         try {
             Files.delete(currentDir.resolve(path));
-            out.format("File %s deleted\n",path.toString());
+            out.format("File %s deleted$n",path.toString());
         } catch (NoSuchFileException e) {
-            err.format("File %s doesn't exist : \n%s\n", path.toString(), e.getMessage());
+            err.format("File %s doesn't exist : $n%s$n", path.toString(), e.getMessage());
         } catch (DirectoryNotEmptyException e) {
-            err.format("%s is directory : \n%s\n", path.toString(), e.getMessage());
+            err.format("%s is directory : $n%s$n", path.toString(), e.getMessage());
         } catch (IOException e) {
-            err.format("I/O error with file %s : \n%s\n", path.toString(), e.getCause());
+            err.format("I/O error with file %s : $n%s$n", path.toString(), e.getCause());
         }
     }
 
@@ -47,41 +47,41 @@ public class FileManager {
         if (Files.exists(currentDir.resolve(path))) {
             if (Files.isDirectory(currentDir.resolve(path))) {
                 currentDir = currentDir.resolve(path).normalize();
-                out.format("Current directory changed to %s\n",path.toString());
+                out.format("Current directory changed to %s$n",path.toString());
             } else {
-                err.format("%s isn't directory\n", path.toString());
+                err.format("%s isn't directory$n", path.toString());
             }
         } else {
-            err.format("Directory %s doesn't exist\n", path.toString());
+            err.format("Directory %s doesn't exist$n", path.toString());
         }
     }
 
     void create(Path path, PrintStream out, PrintStream err) {
         try {
             Files.createFile(currentDir.resolve(path));
-            out.format("File %s created\n",path.toString());
+            out.format("File %s created$n",path.toString());
         } catch (FileAlreadyExistsException e) {
-            err.format("File/directory %s already exists : \n%s\n", path.toString(), e.getReason());
+            err.format("File/directory %s already exists : $n%s$n", path.toString(), e.getReason());
         } catch (IOException e) {
-            err.format("Parent directory of %s doesn't exist : \n%s\n", path.toString(), e.getCause());
+            err.format("Parent directory of %s doesn't exist : $n%s$n", path.toString(), e.getCause());
         }
     }
 
     void mkdir(Path path, PrintStream out, PrintStream err) {
         try {
             Files.createDirectory(currentDir.resolve(path));
-            out.format("Directory %s created\n",path.toString());
+            out.format("Directory %s created$n",path.toString());
         } catch (FileAlreadyExistsException e) {
-            err.format("File/directory %s already exists : \n%s\n", path.toString(), e.getReason());
+            err.format("File/directory %s already exists : $n%s$n", path.toString(), e.getReason());
         } catch (IOException e) {
-            err.format("Parent directory of %s doesn't exist : \n%s\n", path.toString(), e.getCause());
+            err.format("Parent directory of %s doesn't exist : $n%s$n", path.toString(), e.getCause());
         }
     }
 
     void rmdir(Path path, PrintStream out, PrintStream err) {
         try {
             Files.walkFileTree(currentDir.resolve(path), DELETE);
-            out.format("Directory %s deleted\n",path.toString());
+            out.format("Directory %s deleted$n",path.toString());
         } catch (IOException e) {
             err.println(e.getMessage());
         }
@@ -101,16 +101,16 @@ public class FileManager {
                         case "create" -> create(Paths.get(lexemes[1]), out, err);
                         case "mkdir" -> mkdir(Paths.get(lexemes[1]), out, err);
                         case "rmdir" -> rmdir(Paths.get(lexemes[1]), out, err);
-                        default -> err.format("Unsupported operation : %s\n", lexemes[0]);
+                        default -> err.format("Unsupported operation : %s$n", lexemes[0]);
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    err.format("must be more words\n");
+                    err.format("must be more words$n");
                 } catch (InvalidPathException e) {
-                    err.format("Incorrect path : %s \n %s\n", lexemes[1], e.getMessage());
+                    err.format("Incorrect path : %s $n %s$n", lexemes[1], e.getMessage());
                 }
             }
         } catch (IOException e) {
-            err.format("Problems with input : \n %s", e.getMessage());
+            err.format("Problems with input : $n %s", e.getMessage());
         }
     }
 
