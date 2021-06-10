@@ -1,5 +1,4 @@
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -66,18 +65,26 @@ public class Tests {
         base_test(list, sortList, comparator);
     }
 
-
-    @Test
     @SuppressWarnings("unchecked")
-    public void test_05_big_test() {
+    private void big_test(final int N, final int threads) {
         final ArrayList<Integer> list = new ArrayList<>();
-        for (int i = 1; i <= 31; i++) {
+        for (int i = 1; i <= N; i++) {
             list.add(i);
         }
         final List<Integer> sortList = (List<Integer>) list.clone();
         Collections.shuffle(list);
 
-        ParallelSortUtils.parallelQuickSort(5, list);
+        ParallelSortUtils.parallelQuickSort(threads, list);
         base_test(list, sortList);
+    }
+
+    @Test
+    public void test_05_big_test() {
+        big_test(31, 4);
+    }
+
+    @Test
+    public void test_06_very_big_test() {
+        big_test(1000_000, 10);
     }
 }
