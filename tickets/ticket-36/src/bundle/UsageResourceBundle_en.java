@@ -24,7 +24,8 @@ public class UsageResourceBundle_en extends ListResourceBundle {
             {"white king", "white king"},
             {"white rook", "white rook"},
             {"black king", "black king"},
-            {"position now", "Positions is"}
+            {"position now", "Positions is"},
+            {"error", "ERROR"}
     };
 
     @Override

@@ -12,14 +12,15 @@ public class Position {
 
     public Position(String pos) {
         if (pos.matches("[a-h][1-8]")) {
-            x = pos.charAt(0) - '1';
-            y = pos.charAt(1) - 'a';
+            x = pos.charAt(0) - 'a';
+            y = pos.charAt(1) - '1';
         }
     }
 
     @Override
     public String toString() {
-        return String.valueOf('1' + (char) x + 'a' + (char) y);
+        return Character.toString('a' + (char) x) +
+                Character.toString('1' + y);
     }
 
     public Position copy() {

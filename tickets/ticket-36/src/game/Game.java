@@ -38,7 +38,7 @@ public class Game {
     }
 
     public static boolean isAttackKings(Position whiteKing, Position blackKing) {
-        return Math.abs(whiteKing.x - blackKing.x) <= 1 ||
+        return Math.abs(whiteKing.x - blackKing.x) <= 1 &&
                 Math.abs(whiteKing.y - blackKing.y) <= 1;
     }
 

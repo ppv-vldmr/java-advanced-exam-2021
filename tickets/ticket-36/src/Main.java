@@ -35,14 +35,7 @@ public class Main {
                 print("game over");
             }
 
-            System.out.printf("%s : %s - `%s`, %s - `%s`, %s - `%s`",
-                    usageResourceBundle.getString("position now"),
-                    usageResourceBundle.getString("white king"),
-                    positions[0].toString(),
-                    usageResourceBundle.getString("white rook"),
-                    positions[1].toString(),
-                    usageResourceBundle.getString("black king"),
-                    positions[2].toString());
+            printPosition(positions);
             Position oldPosition = game.getBlackKingPosition();
             do {
                 readFigure("black' king", positions, 2);
@@ -117,7 +110,18 @@ public class Main {
     }
 
     private void printError(String output) {
-        System.err.println("ERROR: " + usageResourceBundle.getString(output));
+        System.err.printf("%s: %s\n", usageResourceBundle.getString("error"), usageResourceBundle.getString(output));
+    }
+
+    private void printPosition(Position[] positions) {
+        System.out.printf("%s : %s - `%s`, %s - `%s`, %s - `%s`",
+                usageResourceBundle.getString("position now"),
+                usageResourceBundle.getString("white king"),
+                positions[0].toString(),
+                usageResourceBundle.getString("white rook"),
+                positions[1].toString(),
+                usageResourceBundle.getString("black king"),
+                positions[2].toString());
     }
 
     private void printMove(Move whiteMove) {

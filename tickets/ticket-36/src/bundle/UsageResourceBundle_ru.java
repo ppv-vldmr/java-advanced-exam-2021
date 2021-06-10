@@ -21,7 +21,8 @@ public class UsageResourceBundle_ru extends ListResourceBundle {
             {"white king", "белый король"},
             {"white rook", "белой ладья"},
             {"black king", "черный король"},
-            {"position now", "Текущие позиции"}
+            {"position now", "Текущие позиции"},
+            {"error", "ОШИБКА"}
     };
 
     @Override
