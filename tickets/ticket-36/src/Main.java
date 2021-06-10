@@ -21,16 +21,28 @@ public class Main {
 
         Game game = new Game(positions);
         while (game.isFinished()) {
-            // TODO: ход
+            Move whiteMove = game.whiteMove();
+            printMove(whiteMove);
+
+            if (game.isFinished()) {
+                print("game over");
+            }
+
+            Position position = readBlackMove();
+
         }
     }
 
     private boolean checkBlackKing(Position[] positions) {
-        if (Game.attackKings(positions[0], positions[2]) || Game.attackRookAndKing(positions[2], positions[1])) {
+        if (Game.isAttackKings(positions[0], positions[2]) || Game.isAttackRookAndKing(positions[2], positions[1])) {
             printError("king under attack");
             return false;
         }
         return true;
+    }
+
+    private Position readBlackMove() {
+        readFigure();
     }
 
     private void readFigure(String figureName, Position[] positions, int i) {
@@ -85,5 +97,12 @@ public class Main {
 
     private void printError(String output) {
         System.err.println(usageResourceBundle.getString(output));
+    }
+
+    private void printMove(Move whiteMove) {
+        System.out.printf("%s %s `%s`",
+                usageResourceBundle.getString(whiteMove.figure.toString()),
+                usageResourceBundle.getString("moving to"),
+                usageResourceBundle.getString(whiteMove.newPosition.toString()));
     }
 }

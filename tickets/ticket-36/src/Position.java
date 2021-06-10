@@ -17,4 +17,13 @@ public class Position {
     public String toString() {
         return String.valueOf('1' + (char) x + 'a' + (char) y);
     }
+
+    public Position copy() {
+        return new Position(x, y);
+    }
+
+    public boolean isCorrect() {
+        return 0 <= x && x < 8 &&
+                0 <= y && y < 8;
+    }
 }
