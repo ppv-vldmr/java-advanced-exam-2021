@@ -10,6 +10,7 @@ public class UsageResourceBundle_en extends ListResourceBundle {
             {"white king input", "Enter position of the black king"},
             {"pos format", "Incorrect format position. Expected: [a-h1-8].\n For example, `e2`"},
             {"equals position", "Figure position cannot be equals with other"},
+            {"king under attack", "The black king cannot be under attack before whites move"}
     };
 
     @Override

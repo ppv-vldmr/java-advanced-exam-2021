@@ -5,6 +5,9 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class Main {
+    ResourceBundle usageResourceBundle;
+    BufferedReader br;
+
     private void run(Locale locale) {
         usageResourceBundle = ResourceBundle.getBundle("UsageResourceBundle", locale);
         br = new BufferedReader(new InputStreamReader(System.in));
@@ -14,16 +17,21 @@ public class Main {
         readFigure("white' rook", positions, 1);
         do {
             readFigure("black' king", positions, 2);
-        } while(checkBlackKing(positions));
+        } while (!checkBlackKing(positions));
+
+        Game game = new Game(positions);
+        while (game.isFinished()) {
+            // TODO: ход
+        }
     }
 
     private boolean checkBlackKing(Position[] positions) {
-        // TODO: проверка на находится ли черный король под боем
+        if (Game.attackKings(positions[0], positions[2]) || Game.attackRookAndKing(positions[2], positions[1])) {
+            printError("king under attack");
+            return false;
+        }
         return true;
     }
-
-    ResourceBundle usageResourceBundle;
-    BufferedReader br;
 
     private void readFigure(String figureName, Position[] positions, int i) {
         String input = "";
@@ -56,9 +64,7 @@ public class Main {
 
     public static void main(String[] args) {
         switch (args.length) {
-            case 0 -> {
-                new Main().run(Locale.getDefault());
-            }
+            case 0 -> new Main().run(Locale.getDefault());
             case 1 -> {
                 Locale locale = new Locale(args[0]);
                 new Main().run(locale);
