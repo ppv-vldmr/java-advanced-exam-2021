@@ -1,26 +1,33 @@
+import game.Game;
+import game.Move;
+import game.Position;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.regex.Pattern;
 
 public class Main {
     ResourceBundle usageResourceBundle;
     BufferedReader br;
 
     private void run(Locale locale) {
-        usageResourceBundle = ResourceBundle.getBundle("UsageResourceBundle", locale);
+        usageResourceBundle = ResourceBundle.getBundle("bundle.UsageResourceBundle", locale);
         br = new BufferedReader(new InputStreamReader(System.in));
 
         Position[] positions = new Position[3];
         readFigure("white' king", positions, 0);
         readFigure("white' rook", positions, 1);
+
         do {
             readFigure("black' king", positions, 2);
-        } while (!checkBlackKing(positions));
+        } while (!isCorrectBlackKingPosition(positions));
+
 
         Game game = new Game(positions);
-        while (game.isFinished()) {
+        while (!game.isFinished()) {
             Move whiteMove = game.whiteMove();
             printMove(whiteMove);
 
@@ -28,21 +35,35 @@ public class Main {
                 print("game over");
             }
 
-            Position position = readBlackMove();
-
+            System.out.printf("%s : %s - `%s`, %s - `%s`, %s - `%s`",
+                    usageResourceBundle.getString("position now"),
+                    usageResourceBundle.getString("white king"),
+                    positions[0].toString(),
+                    usageResourceBundle.getString("white rook"),
+                    positions[1].toString(),
+                    usageResourceBundle.getString("black king"),
+                    positions[2].toString());
+            Position oldPosition = game.getBlackKingPosition();
+            do {
+                readFigure("black' king", positions, 2);
+            } while (!isCorrectBlackKingPosition(positions) || !isMoveCorrect(positions[2], oldPosition));
         }
     }
 
-    private boolean checkBlackKing(Position[] positions) {
-        if (Game.isAttackKings(positions[0], positions[2]) || Game.isAttackRookAndKing(positions[2], positions[1])) {
-            printError("king under attack");
+    private boolean isMoveCorrect(Position a, Position b) {
+        if (Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)) != 1) {
+            printError("wrong move");
             return false;
         }
         return true;
     }
 
-    private Position readBlackMove() {
-        readFigure();
+    private boolean isCorrectBlackKingPosition(Position[] positions) {
+        if (Game.isAttackKings(positions[0], positions[2]) || Game.isAttackRookAndKing(positions[2], positions[1])) {
+            printError("king under attack");
+            return false;
+        }
+        return true;
     }
 
     private void readFigure(String figureName, Position[] positions, int i) {
@@ -54,11 +75,11 @@ public class Main {
             } catch (IOException e) {
                 printError("read error");
             }
-        } while (checkPosition(input, positions, i));
+        } while (!isCorrectPosition(input, positions, i));
     }
 
-    private boolean checkPosition(String input, Position[] positions, int i) {
-        if (input.matches("[1-8a-h]")) {
+    private boolean isCorrectPosition(String input, Position[] positions, int i) {
+        if (!Pattern.matches("[a-h][1-8]", input)) {
             printError("pos format");
             return false;
         }
@@ -96,7 +117,7 @@ public class Main {
     }
 
     private void printError(String output) {
-        System.err.println(usageResourceBundle.getString(output));
+        System.err.println("ERROR: " + usageResourceBundle.getString(output));
     }
 
     private void printMove(Move whiteMove) {

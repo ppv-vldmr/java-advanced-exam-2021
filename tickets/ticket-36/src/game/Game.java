@@ -1,7 +1,12 @@
+package game;
+
+import player.MegaBrain;
+
 public class Game {
     final Position whiteKing;
     final Position whiteRook;
     final Position blackKing;
+    final MegaBrain player;
     private Color color;
 
     public Game(Position[] positions) {
@@ -9,6 +14,7 @@ public class Game {
         whiteRook = positions[1];
         blackKing = positions[2];
         color = Color.WHITE;
+        player = new MegaBrain(whiteKing, whiteRook);
     }
 
     public boolean isFinished() {
@@ -31,12 +37,12 @@ public class Game {
         return false;
     }
 
-    static boolean isAttackKings(Position whiteKing, Position blackKing) {
+    public static boolean isAttackKings(Position whiteKing, Position blackKing) {
         return Math.abs(whiteKing.x - blackKing.x) <= 1 ||
                 Math.abs(whiteKing.y - blackKing.y) <= 1;
     }
 
-    static boolean isAttackRookAndKing(Position king, Position rook) {
+    public static boolean isAttackRookAndKing(Position king, Position rook) {
         return rook.x == king.x || rook.y == king.y;
     }
 
@@ -45,15 +51,21 @@ public class Game {
     }
 
     public Move whiteMove() {
-        // TODO: do move
+        player.move(blackKing);
+
+        color = Color.next(color);
         return null;
+    }
+
+    public Position getBlackKingPosition() {
+        return blackKing.copy();
     }
 
     private enum Color {
         WHITE,
         BLACK;
 
-        Color next(Color color) {
+        static Color next(Color color) {
             return color == WHITE ? BLACK : WHITE;
         }
     }

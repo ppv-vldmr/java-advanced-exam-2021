@@ -1,6 +1,8 @@
+package game;
+
 public class Move {
-    Move.Figure figure;
-    Position newPosition;
+    public Move.Figure figure;
+    public Position newPosition;
 
     public enum Figure {
         KING,
