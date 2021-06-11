@@ -23,7 +23,7 @@ public class Main {
 
         do {
             readFigure("black' king", positions, 2);
-        } while (!isCorrectBlackKingPosition(positions));
+        } while (isIncorrectBlackKingPosition(positions));
 
 
         Game game = new Game(positions);
@@ -33,13 +33,15 @@ public class Main {
 
             if (game.isFinished()) {
                 print("game over");
+                return;
             }
 
             printPosition(positions);
             Position oldPosition = game.getBlackKingPosition();
             do {
                 readFigure("black' king", positions, 2);
-            } while (!isCorrectBlackKingPosition(positions) || !isMoveCorrect(positions[2], oldPosition));
+            } while (isIncorrectBlackKingPosition(positions) || !isMoveCorrect(positions[2], oldPosition));
+            game.blackMove(positions[2]);
         }
     }
 
@@ -51,12 +53,12 @@ public class Main {
         return true;
     }
 
-    private boolean isCorrectBlackKingPosition(Position[] positions) {
+    private boolean isIncorrectBlackKingPosition(Position[] positions) {
         if (Game.isAttackKings(positions[0], positions[2]) || Game.isAttackRookAndKing(positions[2], positions[1])) {
             printError("king under attack");
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     private void readFigure(String figureName, Position[] positions, int i) {
@@ -114,7 +116,7 @@ public class Main {
     }
 
     private void printPosition(Position[] positions) {
-        System.out.printf("%s : %s - `%s`, %s - `%s`, %s - `%s`",
+        System.out.printf("%s :\n\t%s - `%s`, \n\t%s - `%s`, \n\t%s - `%s`\n",
                 usageResourceBundle.getString("position now"),
                 usageResourceBundle.getString("white king"),
                 positions[0].toString(),
@@ -125,9 +127,9 @@ public class Main {
     }
 
     private void printMove(Move whiteMove) {
-        System.out.printf("%s %s `%s`",
+        System.out.printf("%s %s `%s`\n",
                 usageResourceBundle.getString(whiteMove.figure.toString()),
                 usageResourceBundle.getString("moving to"),
-                usageResourceBundle.getString(whiteMove.newPosition.toString()));
+                whiteMove.newPosition.toString().toLowerCase());
     }
 }

@@ -22,7 +22,7 @@ public class Game {
     }
 
     private boolean isCheckmate() {
-        return isAttackRookAndKing(blackKing, whiteRook) && isMoving();
+        return isAttackRookAndKing(blackKing, whiteRook) && !isMoving();
     }
 
     private boolean isMoving() {
@@ -51,14 +51,20 @@ public class Game {
     }
 
     public Move whiteMove() {
-        player.move(blackKing);
+        Move move = player.move(blackKing);
 
         color = Color.next(color);
-        return null;
+        return move;
     }
 
     public Position getBlackKingPosition() {
         return blackKing.copy();
+    }
+
+    public void blackMove(Position position) {
+        blackKing.x = position.x;
+        blackKing.y = position.y;
+        color = Color.next(color);
     }
 
     private enum Color {
