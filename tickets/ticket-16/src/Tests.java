@@ -98,7 +98,7 @@ public class Tests {
 
     private void baseCalculateInSeveralThreads(int currentSize, int currentDefaultValue, int test) {
         LazyList<Integer> lazyList = new LazyList<>(getListCallables(currentSize, currentDefaultValue));
-        List<Thread> threadList =  getThreadList(currentSize, lazyList, currentDefaultValue);
+        List<Thread> threadList = getThreadList(currentSize, lazyList, currentDefaultValue);
         final long expectedTime = getExpectedTime(currentSize);
         Assert.assertTrue(calculateTime(
                 () -> {
@@ -173,7 +173,7 @@ public class Tests {
                 // No operations
             }
         }
-        Assert.assertTrue( calculateTime(() -> {
+        Assert.assertTrue(calculateTime(() -> {
             List<Thread> threadList1 = new ArrayList<>();
             for (int i = 0; i < currentSize; i++) {
                 threadList1.add(new Thread(() -> {
@@ -192,6 +192,31 @@ public class Tests {
             }
             return 6;
         }) <= getExpectedTime(currentSize));
+        lazyList.shutdown();
+    }
+
+
+    @Test
+    public void test_07_severalThreadsToOneElement() {
+        LazyList<Integer> lazyList = new LazyList<>(List.of(getCallableWithSleep(0)));
+        List<Thread> threadList = new ArrayList<>();
+        System.out.println(calculateTime(() -> {
+            for (int i = 0; i < 100; i++) {
+                threadList.add(new Thread(() -> {
+                    Assert.assertEquals(Integer.valueOf(0), lazyList.get(0));
+                }));
+                threadList.get(threadList.size() - 1).start();
+            }
+
+            for (Thread thread : threadList) {
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    //No operations
+                }
+            }
+            return 7;
+        }));
         lazyList.shutdown();
     }
 
