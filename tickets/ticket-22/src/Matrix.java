@@ -93,7 +93,7 @@ public class Matrix<T extends Number> {
 
     public void write(final Path path) throws MatrixException {
         directory(path);
-        try (Writer writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+        try (Writer writer = Files.newBufferedWriter(path)) {
             for (int i = 0; i < rows; i++) {
                 for (int j = 0; j < columns; j++) {
                     writer.write(get(i, j).get().toString());
