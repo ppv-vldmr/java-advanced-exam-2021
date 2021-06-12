@@ -10,7 +10,7 @@ public class LazyList<T> extends AbstractList<T> implements ElementCalculator<T>
     ExecutorService executorService;
 
     public LazyList(final int size) {
-        this(new ArrayList<FutureTask<T>>(Collections.nCopies(size, null)));
+        this(new ArrayList<>(Collections.nCopies(size, new FutureTask<T>(() -> null))));
     }
 
     public LazyList(final List<Callable<T>> tasksList) {
@@ -100,7 +100,9 @@ public class LazyList<T> extends AbstractList<T> implements ElementCalculator<T>
 
     public T set(final int i, final Callable<T> callable) throws ExecutionException, InterruptedException {
         final T answer = calculate(i);
-        futureTasks.set(i, LazyList.createFutureTask(callable));
+        synchronized (futureTasks.get(i)) {
+            futureTasks.set(i, LazyList.createFutureTask(callable));
+        }
         return answer;
     }
 

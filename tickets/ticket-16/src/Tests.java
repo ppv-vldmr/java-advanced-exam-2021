@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
 public class Tests {
@@ -145,9 +146,57 @@ public class Tests {
             return 5;
         });
         Assert.assertTrue(wasTime <= expectedTime);
+        lazyList.shutdown();
     }
 
     @Test
+    public void test_06_set() {
+        final int currentSize = 5;
+        LazyList<Integer> lazyList = new LazyList<>(currentSize);
+        List<Thread> threadList = new ArrayList<>();
+        for (int i : List.of(3, 2, 1, 0, 4)) {
+            threadList.add(new Thread(() -> {
+                try {
+                    Assert.assertNull(lazyList.set(i, getCallableWithSleep(i)));
+                } catch (ExecutionException | InterruptedException e) {
+                    // No operations
+                }
+            }));
+        }
+        for (Thread thread : threadList) {
+            thread.start();
+        }
+        for (Thread thread : threadList) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                // No operations
+            }
+        }
+        Assert.assertTrue( calculateTime(() -> {
+            List<Thread> threadList1 = new ArrayList<>();
+            for (int i = 0; i < currentSize; i++) {
+                threadList1.add(new Thread(() -> {
+                    Assert.assertEquals(Integer.valueOf(0), lazyList.get(0));
+                }));
+            }
+            for (Thread thread : threadList1) {
+                thread.start();
+            }
+            for (Thread thread : threadList1) {
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    // No operations
+                }
+            }
+            return 6;
+        }) <= getExpectedTime(currentSize));
+        lazyList.shutdown();
+    }
+
+    @Test
+    @Ignore
     public void test_allSeveralTimes() {
         for (int i = 0; i < 5; i++) {
             test_01_createLazyList();
@@ -155,6 +204,7 @@ public class Tests {
             test_03_calculateInSeveralThreads();
             test_04_calculateInSeveralThreadsBig();
             test_05_contains();
+            test_06_set();
         }
     }
 }
