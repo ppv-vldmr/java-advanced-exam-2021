@@ -38,8 +38,15 @@ public class Memorizer<T, R> implements AutoCloseable {
         }
     }
 
-    private R solveTask() throws ExecutionException, InterruptedException {
-        final T arg = tasksQueue.poll();
+    private R solveTask() {
+        // гарантированно будет 1 элемент
+        T arg = tasksQueue.poll();
+        while (tasksQueue.size() > 0) {
+            if (arg.equals(tasksQueue.peek())) {
+                arg = tasksQueue.poll();
+            }
+        }
+
         computingQueue.add(arg);
         final R result = function.apply(arg);
         computingQueue.poll();
