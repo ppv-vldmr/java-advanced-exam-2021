@@ -48,7 +48,7 @@ public class MyTest {
 
 
         for (int i = 1; i < 20; i++) {
-            var memorizer = new Memo<>(f);
+            var memorizer = new Memorizer<>(f);
             var numberList = intGenerator(i);
             var map = new HashMap<Integer, Integer>();
             System.out.println("testing on input: " + numberList.toString());
