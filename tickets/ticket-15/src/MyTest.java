@@ -2,7 +2,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
+import solution.Memo;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class MyTest {
     private int testNumber = 1;
     private final String descriptionPrefix = "function: ";
+    private Random random = new Random();
 
     @BeforeEach
     public void printTestNumber() {
@@ -26,7 +27,7 @@ public class MyTest {
     }
 
     private List<Integer> intGenerator(int size) {
-        return new Random().ints(-3, 2).limit(size).boxed().collect(Collectors.toList());
+        return random.ints(-3, 2).limit(size).boxed().collect(Collectors.toList());
     }
 // 3571
 
@@ -47,8 +48,8 @@ public class MyTest {
         Function<Integer, Integer> f = x -> x + x;
 
 
-        for (int i = 1; i < 11; i++) {
-            var memorizer = new Memorizer<>(f);
+        for (int i = 1; i < 20; i++) {
+            var memorizer = new Memo<>(f);
             var numberList = intGenerator(i);
             var map = new HashMap<Integer, Integer>();
             System.out.println("testing on input: " + numberList.toString());
@@ -57,8 +58,8 @@ public class MyTest {
                 try {
                     String memoAnswer = memorizer.apply(numberList.get(j));
 
-                    System.out.println(getTrueAnswer(f, map, numberList.get(j)));
-                    System.out.println(memoAnswer + "\n");
+//                    System.out.println(getTrueAnswer(f, map, numberList.get(j)));
+//                    System.out.println(memoAnswer + "\n");
 
                     assertEquals(memoAnswer, getTrueAnswer(f, map, numberList.get(j)));
 
