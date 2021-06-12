@@ -57,8 +57,8 @@ public class MyTest {
                 try {
                     String memoAnswer = memorizer.apply(numberList.get(j));
 
-//                    System.out.println(getTrueAnswer(f, map, numberList.get(j)));
-//                    System.out.println(memoAnswer + "\n");
+                    System.out.println(getTrueAnswer(f, map, numberList.get(j)));
+                    System.out.println(memoAnswer + "\n");
 
                     assertEquals(memoAnswer, getTrueAnswer(f, map, numberList.get(j)));
 
