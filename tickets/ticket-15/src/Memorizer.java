@@ -20,8 +20,6 @@ public class Memorizer<T, R> implements AutoCloseable {
         computingQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     }
 
-    // нужно сделать очередь с заданиями
-
     public String apply(final T arg) throws ExecutionException, InterruptedException {
         final Future<R> cacheVar = cacheMap.get(arg);
 
@@ -30,12 +28,9 @@ public class Memorizer<T, R> implements AutoCloseable {
         }
 
         if (!tasksQueue.contains(arg)
-                && !computingQueue.contains(arg)) {     // а если прямо сейчас выполняется?
-            tasksQueue.add(arg);                 // видимо еще нужна очередь computing
+                && !computingQueue.contains(arg)) {
+            tasksQueue.add(arg);
             final Future<R> val = threadPool.submit(this::solveTask);
-            if (val.get() == null) {
-                return cacheMap.get(arg).get().toString() + " cached";
-            }
             cacheMap.put(arg, val);
             return val.get().toString();
         } else {
@@ -43,29 +38,13 @@ public class Memorizer<T, R> implements AutoCloseable {
         }
     }
 
-    private R solveTask() {
-//        if (tasksQueue.isEmpty()) {
-//            return null;
-//        }
-        try {
-            Thread.currentThread().wait(1000);
-        } catch (InterruptedException e) {
-            // no operations
-        }
+    private R solveTask() throws ExecutionException, InterruptedException {
         final T arg = tasksQueue.poll();
         computingQueue.add(arg);
         final R result = function.apply(arg);
         computingQueue.poll();
         return result;
     }
-
-    private void printAnswer(final String result) {
-        // решить проблему со множественным выводом одного и того же - очередь?
-        synchronized (System.out) {
-            System.out.println(result);
-        }
-    }
-
 
     @Override
     public void close() {
