@@ -10,7 +10,7 @@ public class LazyList<T> extends AbstractList<T> implements ElementCalculator<T>
     ExecutorService executorService;
 
     public LazyList(final int size) {
-        this(new ArrayList<>(Collections.nCopies(size, new FutureTask<T>(() -> null))));
+        this(new ArrayList<>(Collections.nCopies(size, new FutureTask<>(() -> null))));
     }
 
     public LazyList(final List<Callable<T>> tasksList) {
@@ -25,6 +25,7 @@ public class LazyList<T> extends AbstractList<T> implements ElementCalculator<T>
         this.futureTasks = futureTasks;
     }
 
+    //TODO: нужен ли synchronized (нужен)
     private static <E> FutureTask<E> createFutureTask(final Callable<E> callable) {
         return new FutureTask<>(() -> {
             synchronized (callable) {
@@ -34,14 +35,19 @@ public class LazyList<T> extends AbstractList<T> implements ElementCalculator<T>
     }
 
 
+    // TODO: потокобезопасная ли эта операция?
     @Override
     public T calculate(final int index) throws ExecutionException, InterruptedException {
-        // TODO: потокобезопасная ли эта операция?
+
         if (executorService.isShutdown()) {
             throw new InterruptedException();
         }
         if (!futureTasks.get(index).isDone()) {
-            executorService.execute(futureTasks.get(index));
+            synchronized (futureTasks.get(index)) {
+                if (!futureTasks.get(index).isDone()) {
+                    executorService.execute(futureTasks.get(index));
+                }
+            }
         }
         return futureTasks.get(index).get();
     }
@@ -92,7 +98,7 @@ public class LazyList<T> extends AbstractList<T> implements ElementCalculator<T>
             return calculate(i);
         } catch (final ExecutionException | InterruptedException e) {
             // todo: шо делать?
-            System.out.println("test print in get in lazylist");
+            System.err.println("test print in get in lazylist" + e.getMessage());
             return null;
         }
     }
