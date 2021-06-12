@@ -1,6 +1,7 @@
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.RecursiveAction;
 
 public class QuickSortTask<E> extends RecursiveAction {
@@ -10,21 +11,24 @@ public class QuickSortTask<E> extends RecursiveAction {
     private final int l;
     private final int r;
 
+    // Random threadsafe -> all right
+    private final Random random;
+
     QuickSortTask(final List<E> list) {
         this(list, null);
     }
 
     QuickSortTask(final List<E> list, final Comparator<? super E> comparator) {
-        this(list, comparator, 0, list.size() - 1);
+        this(list, comparator, new Random(), 0, list.size() - 1);
     }
 
-    private QuickSortTask(final List<E> list, final Comparator<? super E> comparator, final int l, final int r) {
+    private QuickSortTask(final List<E> list, final Comparator<? super E> comparator, final Random random, final int l, final int r) {
         this.list = list;
         this.comparator = comparator;
         this.l = l;
         this.r = r;
+        this.random = random;
     }
-
 
     @Override
     protected void compute() {
@@ -35,7 +39,7 @@ public class QuickSortTask<E> extends RecursiveAction {
     }
 
     private QuickSortTask<E> newTask(final int l, final int r) {
-        return new QuickSortTask<>(list, comparator, l, r);
+        return new QuickSortTask<>(list, comparator, random, l, r);
     }
 
     @SuppressWarnings("unchecked")
@@ -47,26 +51,7 @@ public class QuickSortTask<E> extends RecursiveAction {
     }
 
     private E getMedian() {
-        final E a = list.get(l);
-        final E b = list.get(r);
-        final E c = list.get((l + r) / 2);
-        if (compareElements(a, b) > 0) {
-            if (compareElements(c, a) > 0) {
-                return a;
-            }
-            if (compareElements(b, c) > 0) {
-                return b;
-            } else {
-                return c;
-            }
-        }
-        if (compareElements(c, b) > 0) {
-            return b;
-        }
-        if (compareElements(a, c) > 0) {
-            return a;
-        }
-        return c;
+        return list.get(random.nextInt(r - l) + l);
     }
 
     private int partition() {
