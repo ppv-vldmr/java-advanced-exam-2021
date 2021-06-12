@@ -33,10 +33,6 @@ public class LazyList<T> extends AbstractList<T> implements ElementCalculator<T>
         });
     }
 
-    private void createNewFutureTask(final int index, final Callable<T> callable) {
-        // TODO: потокобезопасная ли эта операция?
-        futureTasks.set(index, LazyList.createFutureTask(callable));
-    }
 
     @Override
     public T calculate(final int index) throws ExecutionException, InterruptedException {
@@ -52,20 +48,18 @@ public class LazyList<T> extends AbstractList<T> implements ElementCalculator<T>
 
     @Override
     public int size() {
-        // TODO: потокобезопасная ли эта операция?
         return futureTasks.size();
     }
 
     @Override
     public boolean isEmpty() {
-        // TODO: потокобезопасная ли эта операция?
         return futureTasks.isEmpty();
     }
 
     @Override
     public boolean contains(final Object o) {
         // TODO: потокобезопасная ли эта операция?
-        return IntStream.range(0, size() - 1).mapToObj(this::get).allMatch(o::equals);
+        return IntStream.range(0, size()).parallel().mapToObj(this::get).anyMatch(o::equals);
     }
 
 
@@ -98,6 +92,7 @@ public class LazyList<T> extends AbstractList<T> implements ElementCalculator<T>
             return calculate(i);
         } catch (final ExecutionException | InterruptedException e) {
             // todo: шо делать?
+            System.out.println("test print in get in lazylist");
             return null;
         }
     }
@@ -105,7 +100,7 @@ public class LazyList<T> extends AbstractList<T> implements ElementCalculator<T>
 
     public T set(final int i, final Callable<T> callable) throws ExecutionException, InterruptedException {
         final T answer = calculate(i);
-        createNewFutureTask(i, callable);
+        futureTasks.set(i, LazyList.createFutureTask(callable));
         return answer;
     }
 
