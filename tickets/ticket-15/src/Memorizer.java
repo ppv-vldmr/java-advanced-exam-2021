@@ -78,7 +78,7 @@ public class Memorizer<T extends Comparable<T>, R> implements AutoCloseable, Fun
         computingSet.clear();
     }
 
-    public void shutdownAndAwaitTermination(final ExecutorService pool) {
+    public void shutdownAndAwaitTermination(final ExecutorService pool) {   // private
         pool.shutdown(); // Disable new tasks from being submitted
         try {
             // Wait a while for existing tasks to terminate
