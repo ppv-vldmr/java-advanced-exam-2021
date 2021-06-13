@@ -6,10 +6,7 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class UDPProxy {
     private Map<Integer, List<SocketAddress> > table;
@@ -42,8 +39,35 @@ public class UDPProxy {
                 table.get(localPort).add(address);
             }
             executors.submit(this::run);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (final IOException e) {
+            processException("Can't start", e);
+        }
+    }
+
+    public void close() {
+        try {
+            Closed = true;
+            shutdownAndAwaitTermination(executors);
+            for (SelectionKey key : selector.keys()) {
+                key.channel().close();
+            }
+            selector.close();
+        } catch (final IOException e) {
+            processException("Can't close", e);
+        }
+    }
+
+    private void shutdownAndAwaitTermination(ExecutorService pool) {
+        pool.shutdown();
+        try {
+            if (!pool.awaitTermination(10, TimeUnit.SECONDS)) {
+                pool.shutdownNow();
+                if (!pool.awaitTermination(10, TimeUnit.SECONDS))
+                    System.err.println("Pool did not terminate");
+            }
+        } catch (InterruptedException ie) {
+            pool.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 
