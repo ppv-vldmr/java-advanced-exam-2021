@@ -16,14 +16,14 @@ public class Client {
         }
 
         try {
-            Server server;
+            Manager server;
             try {
-                server = (Server) Naming.lookup("//localhost/server");
+                server = (Manager) Naming.lookup("//localhost/server");
             } catch (final NotBoundException e) {
                 System.out.println("Server is not bound");
                 return;
-            } catch (final MalformedURLException e) {
-                System.err.println("Malformed URL");
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
                 return;
             }
 
@@ -36,14 +36,17 @@ public class Client {
                     break;
                 }
                 case "delete": {
-                    if (args.length == 1) {
-                        server.deleteLastString();
+                    if (args.length == 1 ? server.deleteLastString() : server.deleteString(args[1])) {
+                        System.out.println("String deleted");
                     } else {
-                        server.deleteString(args[1]);
+                        System.out.println("Cannot delete");
                     }
                     break;
                 }
                 case "list": {
+                    if (args.length > 1) {
+                        throw new IllegalArgumentException("Expected 1 argument");
+                    }
                     System.out.print(
                             server
                                 .getAllStrings()

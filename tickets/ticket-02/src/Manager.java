@@ -2,7 +2,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 
-public interface Server extends Remote {
+public interface Manager extends Remote {
     void addString(String s) throws RemoteException;
 
     boolean deleteLastString() throws RemoteException;
