@@ -17,7 +17,8 @@ public class Main {
                     queue.add(i);
                     System.out.println("First thread add to queue element " + i + ". Current elements : " + queue.size());
                 } catch (InterruptedException e) {
-                    // No operations
+                    Thread.currentThread().interrupt();
+                    break;
                 }
             }
         });
@@ -30,7 +31,8 @@ public class Main {
                     Thread.sleep(SLEEP_SECOND_THREAD);
                     System.out.println("Second thread removed an element from queue: " + queue.remove() + ". Current elements: " + queue.size());
                 } catch (InterruptedException e) {
-                    // no operations
+                    Thread.currentThread().interrupt();
+                    break;
                 }
             }
         });
