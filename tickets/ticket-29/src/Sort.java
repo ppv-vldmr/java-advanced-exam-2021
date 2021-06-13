@@ -12,8 +12,7 @@ public class Sort {
     }
 
     void merge(BufferedReader[] ins, PrintStream out, Comparator<? super String> comp) throws IOException {
-        Comparator<String> nullComparator = Comparator.comparing(Objects::isNull);
-        nullComparator.thenComparing(comp);
+        Comparator<String> nullComparator = Comparator.nullsLast(comp);
         String[] strs = {ins[0].readLine(), ins[1].readLine()};
         Consumer<Integer> next = (Integer ind) -> {
             out.println(strs[ind]);
@@ -41,24 +40,20 @@ public class Sort {
         try {
             Files.createDirectories(folder);
             files = cut(in, folder, comp);
-            int current
-            for (int i = 0; 2 * i + 1 < files.size(); i++) {
-                files.add(make_name(folder, files.size()));
-                PrintStream tempOut = new PrintStream(new FileOutputStream(files.get(files.size() - 1).toFile()));
+            int current = files.size();
+            while (files.size() >= 2) {
+                Path file1 = files.poll(), file2 = files.poll(), tempOut = make_name(folder, current++);
+                files.add(tempOut);
+                PrintStream tempPrintStream = new PrintStream(new FileOutputStream(tempOut.toFile()));
                 merge(new BufferedReader[]{
-                                Files.newBufferedReader(files.get(2 * i)),
-                                Files.newBufferedReader(files.get(2 * i + 1))},
-                        tempOut, comp);
+                        Files.newBufferedReader(file1),
+                        Files.newBufferedReader(file2)
+                }, tempPrintStream, comp);
             }
-
-            while (files.size() > 1) {
-
-            }
-            BufferedReader outReader = Files.newBufferedReader(files.get(files.size()-1));
+            BufferedReader outReader = Files.newBufferedReader(files.poll());
             String str;
-            while((str = outReader.readLine())!=null) {
+            while ((str = outReader.readLine()) != null)
                 out.println(str);
-            }
         } catch (IOException e) {
             err.println(e.getMessage());
         }
@@ -93,33 +88,52 @@ public class Sort {
         return files;
     }
 
-    static Comparator<? super String> takeComparator(String[] args) {
-
-        return Comparator.naturalOrder();
+    static Comparator<? super String> takeComparator(ArrayList<String> options) {
+        // TODO пересмотрите эту функцию, почти наверняка я где-то набагал
+        Comparator<String> ans = Comparator.naturalOrder();
+        if(options.contains("--ignore-case")) {
+            ans = String::compareToIgnoreCase;
+        }
+        if(options.contains("--dictionary-order")) {
+            ans = Comparator.comparing(s -> s.replaceAll("[^\\da-zA-Zа-яёА-ЯЁ ]", ""));
+        }
+        if(options.contains("--ignore-leading-blanks")) {
+            ans = Comparator.comparing(s -> s.replaceAll("[ ]", ""));
+        }
+        if(options.contains("--numeric-sort")) {
+            Comparator<String> temp= Comparator.comparing(n -> Long.parseLong(String.valueOf(n)));
+            temp.thenComparing(ans);
+        }
+        if(options.contains("--general-numeric-sort")) {
+            ans= Comparator.comparing(n -> Long.parseLong(String.valueOf(n)));
+        }
+        return options.contains("--reverse") ? ans.reversed() : ans;
     }
 
     public static void main(String[] args) {
-        if(Arrays.stream(args).anyMatch(Objects::isNull)) {
+        if (args == null || Arrays.stream(args).anyMatch(Objects::isNull)) {
             System.err.println("All must not be nulls");
+            return;
         }
-        BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
-        PrintStream out=System.out,err=System.err;
-        int expectedLength = 1;
-        try{
-            if (args.length >= expectedLength && !args[0].matches("/-")) {
-                in = Files.newBufferedReader(Path.of(args[0]));
-                expectedLength++;
+        ArrayList<String> options = new ArrayList<>(), files = new ArrayList<>();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        PrintStream err = System.err, out = System.out;
+        Arrays.stream(args).forEach(s -> {
+            if (s.startsWith("-")) options.add(s);
+            else files.add(s);
+        });
+        for (String s : files) {
+            String[] elements = s.split("=");
+            try {
+                switch (elements[0]) {
+                    case "out" -> out = new PrintStream(new FileOutputStream(elements[1]));
+                    case "in" -> reader = Files.newBufferedReader(Path.of(elements[1]));
+                    case "err" -> err = new PrintStream(new FileOutputStream(elements[1]));
+                }
+            } catch (IOException e) {
+                System.err.println("Problems : \n" + e.getMessage());
             }
-            if (args.length >= expectedLength && !args[1].matches("/-")) {
-                out = new PrintStream(new FileOutputStream(args[1]));
-                expectedLength++;
-            }
-            if (args.length >= expectedLength && !args[2].matches("/-")) {
-                out = new PrintStream(new FileOutputStream(args[1]));
-            }
-            new Sort(takeComparator(args),in,out,err);
-        } catch (IOException e) {
-            System.err.println("Problems with output/error output/input : " + e.getMessage());
         }
+        new Sort(takeComparator(options), reader, out, err);
     }
 }
