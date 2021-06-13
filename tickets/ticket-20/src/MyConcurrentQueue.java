@@ -4,11 +4,11 @@ import java.util.List;
 
 public class MyConcurrentQueue<E> {
 
-    List<E> array;
+    private volatile List<E> array;
     private final int numberOfElements;
-    private int currentNumbersOfElements;
-    private int tail;
-    private int head;
+    private volatile int currentNumbersOfElements;
+    private volatile int tail;
+    private volatile int head;
 
     MyConcurrentQueue(int numberOfElements) {
         this.numberOfElements = numberOfElements;
