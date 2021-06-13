@@ -7,6 +7,18 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Client {
+    public static Manager serverLookup() throws RemoteException {
+        try {
+            return (Manager) Naming.lookup("//localhost/server");
+        } catch (final NotBoundException e) {
+            System.err.println("Server is not bound");
+            return null;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static void main(String[] args) {
         if (args == null || Arrays.stream(args).anyMatch(Objects::isNull)) {
             throw new IllegalArgumentException("Args is null or contains null");
@@ -16,50 +28,47 @@ public class Client {
         }
 
         try {
-            Manager server;
-            try {
-                server = (Manager) Naming.lookup("//localhost/server");
-            } catch (final NotBoundException e) {
-                System.out.println("Server is not bound");
-                return;
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
+            Manager server = serverLookup();
+            if (server == null) {
                 return;
             }
+            processArgs(server, args);
+        } catch (final RemoteException e) {
+            System.err.println(e.getMessage());
+        }
+    }
 
-            switch (args[0]) {
-                case "add": {
-                    if (args.length != 2) {
-                        throw new IllegalArgumentException("Expected second argument");
-                    }
-                    server.addString(args[1]);
-                    break;
+    public static void processArgs(Manager server, String[] args) throws RemoteException {
+        switch (args[0]) {
+            case "add": {
+                if (args.length != 2) {
+                    throw new IllegalArgumentException("Expected second argument");
                 }
-                case "delete": {
-                    if (args.length == 1 ? server.deleteLastString() : server.deleteString(args[1])) {
-                        System.out.println("String deleted");
-                    } else {
-                        System.out.println("Cannot delete");
-                    }
-                    break;
+                server.addString(args[1]);
+                break;
+            }
+            case "delete": {
+                if (args.length == 1 ? server.deleteLastString() : server.deleteString(args[1])) {
+                    System.out.println("String deleted");
+                } else {
+                    System.out.println("Cannot delete");
                 }
-                case "list": {
-                    if (args.length > 1) {
-                        throw new IllegalArgumentException("Expected 1 argument");
-                    }
-                    System.out.print(
-                            server
+                break;
+            }
+            case "list": {
+                if (args.length > 1) {
+                    throw new IllegalArgumentException("Expected 1 argument");
+                }
+                System.out.println(
+                        server
                                 .getAllStrings()
                                 .stream()
                                 .collect(Collectors.joining(System.lineSeparator()))
-                    );
-                    break;
-                }
-                default:
-                    throw new UnsupportedOperationException();
+                );
+                break;
             }
-        } catch (final RemoteException e) {
-            System.err.println(e.getMessage());
+            default:
+                throw new UnsupportedOperationException();
         }
     }
 }
