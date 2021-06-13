@@ -16,6 +16,4 @@ _______________
 
 # Запуск
 * Командная строка:
-`Main white_king_position white_rook_position black_rook_position`
-* Формат позиции:
-`[1-8a-h]`
+`Main [en | ru]`
