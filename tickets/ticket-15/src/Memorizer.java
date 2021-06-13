@@ -1,53 +1,72 @@
 import java.util.Queue;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
 @SuppressWarnings({"unused"})
-public class Memorizer<T, R> implements AutoCloseable {
+public class Memorizer<T extends Comparable<T>, R> implements AutoCloseable, Function<T, R> {
     private final Function<T, R> function;
     private final ConcurrentMap<T, Future<R>> cacheMap;
-    private final int
-            THREADS_AMOUNT = 4,
-            QUEUE_SIZE = 64;
+    private final int THREADS_AMOUNT = 4, QUEUE_SIZE = 64;
     private final ExecutorService threadPool;
-    private final Queue<T> tasksQueue, computingQueue;
+    private final Queue<T> tasksQueue;
+    private final Set<T> computingSet;
 
     public Memorizer(final Function<T, R> function) {
         this.function = function;
         cacheMap = new ConcurrentHashMap<>();
         threadPool = Executors.newFixedThreadPool(THREADS_AMOUNT);
         tasksQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
-        computingQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
+        computingSet = new TreeSet<>();
     }
 
-    public String apply(final T arg) throws ExecutionException, InterruptedException {
+    @Override
+    public R apply(final T arg) {
         final Future<R> cacheVar = cacheMap.get(arg);
 
         if (cacheVar != null) {
-            return cacheVar.get().toString() + " cached";
+            try {
+                return cacheVar.get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
 
-        if (!tasksQueue.contains(arg)
-                && !computingQueue.contains(arg)) {
+        if (!tasksQueue.contains(arg) && !computingSet.contains(arg)) {
             tasksQueue.add(arg);
             final Future<R> val = threadPool.submit(this::solveTask);
             cacheMap.put(arg, val);
-            return val.get().toString();
+            try {
+                return val.get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+                return null;
+            }
         } else {
-            return cacheMap.get(arg).get().toString();
+            try {
+                return cacheMap.get(arg).get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
     }
 
-    private R solveTask() {
+    private R solveTask() throws ExecutionException, InterruptedException {
         T arg = tasksQueue.poll();
-        while (tasksQueue.size() > 0) {
-            if (arg.equals(tasksQueue.peek())) {
-                arg = tasksQueue.poll();
+
+        synchronized (computingSet) {
+            if (computingSet.contains(arg)) {
+                return cacheMap.get(arg).get();
+            } else {
+                computingSet.add(arg);
             }
         }
-        computingQueue.add(arg);
+
         final R result = function.apply(arg);
-        computingQueue.poll();
+        computingSet.remove(arg);
         return result;
     }
 
@@ -56,6 +75,7 @@ public class Memorizer<T, R> implements AutoCloseable {
         shutdownAndAwaitTermination(threadPool);
         cacheMap.clear();
         tasksQueue.clear();
+        computingSet.clear();
     }
 
     public void shutdownAndAwaitTermination(final ExecutorService pool) {
