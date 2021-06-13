@@ -1,0 +1,37 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="UTF8">
+	</head>
+	<body>
+		<h2>
+			Билет 26. Markdown2HTML
+		</h2>
+		<p>
+			Написать программу, преобразующую Markdown-разметку (http://en.wikipedia.org/wiki/Markdown) в (X)HTML.
+		</p>
+		<h3>
+			Функциональность
+		</h3>
+		<p>
+			<ul>
+				<li>Поддержка ввода данных из файла и стандартного ввода.
+				</li>
+				<li>Поддержка вывода данных в файл и стандартный вывод.
+				</li>
+				<li>Поддержка указания кодировки входного и выходного файлов</li>
+			</ul>
+
+		</p>
+		<h3>
+			Технологии
+		</h3>
+		<p>
+			<ul>
+				<li>I/O
+				</li>
+				<li>Collections Framework</li>
+			</ul>
+		</p>
+	</body>
+</html>

@@ -15,6 +15,7 @@ public class Markdown2HTML {
     static String inputEncode = "UTF8";
     static String outputEncode = "UTF8";
     private static String line = "";
+    private static String lastHeadline = "";
     private static StringBuilder paragraph = new StringBuilder();
     static int index;
     static int tabCount = 2;
@@ -23,9 +24,11 @@ public class Markdown2HTML {
     static boolean swapQuote = false;
     static int newTypeList = 0; //0 - don't list, 1 - unordered list, 2 - ordered list
     static int currentTypeList = 0;
-    static int levelList = 0;
+    static int levelList = -1;
     static int newLevelList = 0;
     static boolean swapType = false;
+
+    static StringBuilder logger = new StringBuilder();
 
     static final private Map<String, String> closeSequences = new HashMap<>(Map.of(
             "**", "</strong>",
@@ -65,6 +68,7 @@ public class Markdown2HTML {
 
     public static void run(BufferedReader in) throws IOException {
         StringBuilder parsedMarkdownText = new StringBuilder();
+        line = "";
 
         parsedMarkdownText.append("<!DOCTYPE HTML>").append('\n').append("<html>").append('\n').append(TAB).append("<head>")
                 .append('\n').append(TAB + TAB).append("<meta charset=\"").append(outputEncode).append("\">").append('\n')
@@ -73,6 +77,8 @@ public class Markdown2HTML {
             parsedMarkdownText.append(parseParagraph()).append('\n');
         }
         parsedMarkdownText.append(TAB).append("</body>").append('\n').append("</html>");
+
+        logger = parsedMarkdownText;
 
         print(parsedMarkdownText.toString());
     }
@@ -314,6 +320,8 @@ public class Markdown2HTML {
             convertedQuote.append('\n').append(generateTab());
             convertedQuote.append("</blockquote>");
             sizeQuote = last;
+        } else {
+            index--;
         }
 
         return convertedQuote.toString();
@@ -491,7 +499,7 @@ public class Markdown2HTML {
             i++;
         }
 
-        if(line.charAt(i) == ' ')
+        if(i > 0 && line.charAt(i) == ' ')
             return true;
 
         return false;
@@ -530,6 +538,11 @@ public class Markdown2HTML {
         }
 
         paragraph = new StringBuilder();
+        if(lastHeadline != "") {
+            paragraph.append(lastHeadline);
+            lastHeadline = "";
+            return paragraph.toString();
+        }
         paragraph.append(line);
 
         if(isHeadline()) {
@@ -547,6 +560,11 @@ public class Markdown2HTML {
                 nextLine(in);
                 return paragraph.toString();
             }
+            if(isHeadline()) {
+                lastHeadline = line;
+                nextLine(in);
+                return paragraph.toString();
+            }
             paragraph.append("\n");
             paragraph.append(line);
         }
@@ -559,41 +577,46 @@ public class Markdown2HTML {
     }
 
     public static void main(String[] args) throws IOException {
-            if(Arrays.stream(args).anyMatch(Objects::isNull)) {
+        if(Arrays.stream(args).anyMatch(Objects::isNull)) {
             System.err.println("Expected all not null arguments");
         }
 
-        switch (args.length) {
-            case 1 -> {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+        if(args[0].equals("Standard")){
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+                run(reader);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if(args[0].equals("File")) {
+            if(args.length != 3 && args.length != 5) {
+                logger.append("Expected 3 or 5 arguments");
+                System.err.println("Expected 3 or 5 arguments");
+            }
+
+            String curPath = new File("").getAbsolutePath() + "\\src\\testFiles\\";
+            if(args.length == 5) {
+                inputEncode = args[3];
+                outputEncode = args[4];
+            }
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    new FileInputStream(curPath + args[1]), inputEncode))
+            ) {
+                try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream(curPath + args[2]), outputEncode))
+                )  {
+                    out = writer;
                     run(reader);
                 } catch (IOException e) {
+                    System.err.println("Problems with output file : ");
                     e.printStackTrace();
                 }
+            } catch (IOException e) {
+                System.err.println("Problems with input file : ");
+                e.printStackTrace();
             }
-            case 3, 5 -> {
-                if(args.length == 5) {
-                    inputEncode = args[3];
-                    outputEncode = args[4];
-                }
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                        new FileInputStream(args[1]), inputEncode))
-                ) {
-                    try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-                            new FileOutputStream(args[2]), outputEncode))
-                    )  {
-                        out = writer;
-                        run(reader);
-                    } catch (IOException e) {
-                        System.err.println("Problems with output file : ");
-                        e.printStackTrace();
-                    }
-                } catch (IOException e) {
-                    System.err.println("Problems with input file : ");
-                    e.printStackTrace();
-                }
-            }
-            default -> System.err.println("Expected 1, 3 or 5 arguments");
+        } else {
+            logger.append("Unknown input type");
+            System.err.println("Unknown input type");
         }
     }
 }
