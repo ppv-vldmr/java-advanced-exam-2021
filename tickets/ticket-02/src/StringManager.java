@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class StringServer extends UnicastRemoteObject implements Server {
+public class StringManager extends UnicastRemoteObject implements Manager {
     private final static int DEFAULT_PORT = 8888;
     private final List<String> data = new ArrayList<>();
 
@@ -17,19 +17,23 @@ public class StringServer extends UnicastRemoteObject implements Server {
         }
 
         final int port = args.length > 0 ? Integer.parseInt(args[0]) : DEFAULT_PORT;
+        startNewServer(port);
+    }
+
+    public static void startNewServer(final int port) {
         try {
-            final Server server = new StringServer(port);
+            final Manager server = new StringManager(port);
             Naming.rebind("//localhost/server", server);
-        } catch (RemoteException e) {
+        } catch (final RemoteException e) {
             System.err.println("Cannot export object: " + e.getMessage());
         } catch (final MalformedURLException ignored) {}
         System.out.println("Server started");
     }
 
-    public StringServer() throws RemoteException {
+    public StringManager() throws RemoteException {
     }
 
-    public StringServer(int port) throws RemoteException {
+    public StringManager(int port) throws RemoteException {
         super(port);
     }
 
