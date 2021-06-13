@@ -1,1 +1,1 @@
-java -cp out Client %*
+@java -cp out Client %*

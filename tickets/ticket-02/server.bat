@@ -1,1 +1,1 @@
-java -cp out StringManager %*
+@start java -cp out StringManager %*
