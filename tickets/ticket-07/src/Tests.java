@@ -1,117 +1,177 @@
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Set;
+
 public class Tests {
 
     private ClassesRelationships classesRelationships;
 
-    private void prepare(String testFile) {
-        classesRelationships = new ClassesRelationships();
-        classesRelationships.logger = new StringBuilder();
-        classesRelationships.main(new String[]{"tickets/ticket-07/src/" + testFile});
-    }
-
     @Test
-    public void twoLists() {
-        prepare("testFiles/test01");
+    public void twoLists() throws ClassNotFoundException {
+        classesRelationships = new ClassesRelationships("tickets/ticket-07/src/testFiles/test01");
+        Assert.assertTrue(classesRelationships.checkCoincidence());
+        Assert.assertTrue(classesRelationships.checkSamePackages());
+        Assert.assertEquals(classesRelationships.findAncestor(), "");
         Assert.assertEquals(
-                classesRelationships.logger.toString(),
-                "Classes are the same (coincidence)\n" +
-                "Classes have the same package\n" +
-                "No one is ancestor of java.util.List and java.util.List\n" +
-                "Common interfaces: java.util.Collection java.lang.Iterable \n" +
-                "No common classes\n"
+            classesRelationships.findCommonAncestorInterfaces(),
+            Set.of(
+                Class.forName("java.util.Collection"),
+                Class.forName("java.lang.Iterable")
+            )
+        );
+        Assert.assertEquals(
+            classesRelationships.findCommonAncestors(),
+            Set.of(
+                Class.forName("java.util.Collection"),
+                Class.forName("java.lang.Iterable")
+            )
         );
     }
 
     @Test
-    public void listAndArrayList() {
-        prepare("testFiles/test02");
+    public void listAndArrayList() throws ClassNotFoundException {
+        classesRelationships = new ClassesRelationships("tickets/ticket-07/src/testFiles/test02");
+        Assert.assertFalse(classesRelationships.checkCoincidence());
+        Assert.assertTrue(classesRelationships.checkSamePackages());
+        Assert.assertEquals(classesRelationships.findAncestor(), "java.util.List");
         Assert.assertEquals(
-                classesRelationships.logger.toString(),
-                "Classes are different\n" +
-                "Classes have the same package\n" +
-                "java.util.List is ancestor of java.util.ArrayList\n" +
-                "Common interfaces: java.util.Collection java.lang.Iterable \n" +
-                "No common classes\n"
+                classesRelationships.findCommonAncestorInterfaces(),
+                Set.of(
+                        Class.forName("java.util.Collection"),
+                        Class.forName("java.lang.Iterable")
+                )
+        );
+        Assert.assertEquals(
+                classesRelationships.findCommonAncestors(),
+                Set.of(
+                        Class.forName("java.util.Collection"),
+                        Class.forName("java.lang.Iterable")
+                )
         );
     }
 
     @Test
-    public void arrayListAndList() {
-        prepare("testFiles/test03");
+    public void arrayListAndList() throws ClassNotFoundException {
+        classesRelationships = new ClassesRelationships("tickets/ticket-07/src/testFiles/test03");
+        Assert.assertFalse(classesRelationships.checkCoincidence());
+        Assert.assertTrue(classesRelationships.checkSamePackages());
+        Assert.assertEquals(classesRelationships.findAncestor(), "java.util.List");
         Assert.assertEquals(
-                classesRelationships.logger.toString(),
-                "Classes are different\n" +
-                "Classes have the same package\n" +
-                "java.util.List is ancestor of java.util.ArrayList\n" +
-                "Common interfaces: java.util.Collection java.lang.Iterable \n" +
-                "No common classes\n"
+                classesRelationships.findCommonAncestorInterfaces(),
+                Set.of(
+                        Class.forName("java.util.Collection"),
+                        Class.forName("java.lang.Iterable")
+                )
+        );
+        Assert.assertEquals(
+                classesRelationships.findCommonAncestors(),
+                Set.of(
+                        Class.forName("java.util.Collection"),
+                        Class.forName("java.lang.Iterable")
+                )
         );
     }
 
     @Test
-    public void listAndCollection() {
-        prepare("testFiles/test04");
+    public void listAndCollection() throws ClassNotFoundException {
+        classesRelationships = new ClassesRelationships("tickets/ticket-07/src/testFiles/test04");
+        Assert.assertFalse(classesRelationships.checkCoincidence());
+        Assert.assertTrue(classesRelationships.checkSamePackages());
+        Assert.assertEquals(classesRelationships.findAncestor(), "java.util.Collection");
         Assert.assertEquals(
-                classesRelationships.logger.toString(),
-                "Classes are different\n" +
-                "Classes have the same package\n" +
-                "java.util.Collection is ancestor of java.util.List\n" +
-                "Common interfaces: java.lang.Iterable \n" +
-                "No common classes\n"
+                classesRelationships.findCommonAncestorInterfaces(),
+                Set.of(
+                        Class.forName("java.lang.Iterable")
+                )
+        );
+        Assert.assertEquals(
+                classesRelationships.findCommonAncestors(),
+                Set.of(
+                        Class.forName("java.lang.Iterable")
+                )
         );
     }
 
     @Test
-    public void listAndAbstractList() {
-        prepare("testFiles/test05");
+    public void listAndAbstractList() throws ClassNotFoundException {
+        classesRelationships = new ClassesRelationships("tickets/ticket-07/src/testFiles/test05");
+        Assert.assertFalse(classesRelationships.checkCoincidence());
+        Assert.assertTrue(classesRelationships.checkSamePackages());
+        Assert.assertEquals(classesRelationships.findAncestor(), "java.util.List");
         Assert.assertEquals(
-                classesRelationships.logger.toString(),
-                "Classes are different\n" +
-                "Classes have the same package\n" +
-                "java.util.List is ancestor of java.util.AbstractList\n" +
-                "Common interfaces: java.util.Collection java.lang.Iterable \n" +
-                "No common classes\n"
+                classesRelationships.findCommonAncestorInterfaces(),
+                Set.of(
+                        Class.forName("java.lang.Iterable"),
+                        Class.forName("java.util.Collection")
+                )
+        );
+        Assert.assertEquals(
+                classesRelationships.findCommonAncestors(),
+                Set.of(
+                        Class.forName("java.lang.Iterable"),
+                        Class.forName("java.util.Collection")
+                )
         );
     }
 
     @Test
-    public void abstractListAndArrayList() {
-        prepare("testFiles/test06");
+    public void abstractListAndArrayList() throws ClassNotFoundException {
+        classesRelationships = new ClassesRelationships("tickets/ticket-07/src/testFiles/test06");
+        Assert.assertFalse(classesRelationships.checkCoincidence());
+        Assert.assertTrue(classesRelationships.checkSamePackages());
+        Assert.assertEquals(classesRelationships.findAncestor(), "java.util.AbstractList");
         Assert.assertEquals(
-                classesRelationships.logger.toString(),
-                "Classes are different\n" +
-                "Classes have the same package\n" +
-                "java.util.AbstractList is ancestor of java.util.ArrayList\n" +
-                "Common interfaces: java.util.List java.util.Collection java.lang.Iterable \n" +
-                "Common classes: java.util.AbstractCollection java.lang.Object \n"
+                classesRelationships.findCommonAncestorInterfaces(),
+                Set.of(
+                        Class.forName("java.lang.Iterable"),
+                        Class.forName("java.util.Collection"),
+                        Class.forName("java.util.List")
+                )
+        );
+        Assert.assertEquals(
+                classesRelationships.findCommonAncestors(),
+                Set.of(
+                        Class.forName("java.lang.Iterable"),
+                        Class.forName("java.util.Collection"),
+                        Class.forName("java.util.List"),
+                        Class.forName("java.lang.Object"),
+                        Class.forName("java.util.AbstractCollection")
+                )
         );
     }
 
     @Test
-    public void providerAndArrayList() {
-        prepare("testFiles/test07");
+    public void providerAndArrayList() throws ClassNotFoundException {
+        classesRelationships = new ClassesRelationships("tickets/ticket-07/src/testFiles/test07");
+        Assert.assertFalse(classesRelationships.checkCoincidence());
+        Assert.assertFalse(classesRelationships.checkSamePackages());
+        Assert.assertEquals(classesRelationships.findAncestor(), "");
         Assert.assertEquals(
-                classesRelationships.logger.toString(),
-                "Classes are different\n" +
-                "Classes have different packages\n" +
-                "No one is ancestor of java.security.Provider and java.util.ArrayList\n" +
-                "No common interfaces\n" +
-                "Common classes: java.lang.Object \n"
+                classesRelationships.findCommonAncestorInterfaces(),
+                Set.of()
+        );
+        Assert.assertEquals(
+                classesRelationships.findCommonAncestors(),
+                Set.of(
+                        Class.forName("java.lang.Object")
+                )
         );
     }
 
     @Test
     public void listAndMap() {
-        prepare("testFiles/test08");
+        classesRelationships = new ClassesRelationships("tickets/ticket-07/src/testFiles/test08");
+        Assert.assertFalse(classesRelationships.checkCoincidence());
+        Assert.assertTrue(classesRelationships.checkSamePackages());
+        Assert.assertEquals(classesRelationships.findAncestor(), "");
         Assert.assertEquals(
-                classesRelationships.logger.toString(),
-                "Classes are different\n" +
-                "Classes have the same package\n" +
-                "No one is ancestor of java.util.List and java.util.Map\n" +
-                "No common interfaces\n" +
-                "No common classes\n"
+                classesRelationships.findCommonAncestorInterfaces(),
+                Set.of()
+        );
+        Assert.assertEquals(
+                classesRelationships.findCommonAncestors(),
+                Set.of()
         );
     }
 }
