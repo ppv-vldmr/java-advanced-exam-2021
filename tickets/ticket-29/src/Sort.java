@@ -37,10 +37,11 @@ public class Sort {
 
     Sort(Comparator<? super String> comp, BufferedReader in, PrintStream out, PrintStream err) {
         Path folder = Path.of(System.getProperty("user.dir")).resolve(".sorting");
-        ArrayList<Path> files;
+        ArrayDeque<Path> files;
         try {
             Files.createDirectories(folder);
             files = cut(in, folder, comp);
+            int current
             for (int i = 0; 2 * i + 1 < files.size(); i++) {
                 files.add(make_name(folder, files.size()));
                 PrintStream tempOut = new PrintStream(new FileOutputStream(files.get(files.size() - 1).toFile()));
@@ -48,6 +49,10 @@ public class Sort {
                                 Files.newBufferedReader(files.get(2 * i)),
                                 Files.newBufferedReader(files.get(2 * i + 1))},
                         tempOut, comp);
+            }
+
+            while (files.size() > 1) {
+
             }
             BufferedReader outReader = Files.newBufferedReader(files.get(files.size()-1));
             String str;
@@ -59,9 +64,9 @@ public class Sort {
         }
     }
 
-    ArrayList<Path> cut(BufferedReader in, Path folder, Comparator<? super String> comp) throws IOException {
+    ArrayDeque<Path> cut(BufferedReader in, Path folder, Comparator<? super String> comp) throws IOException {
         String str;
-        ArrayList<Path> files = new ArrayList<>();
+        ArrayDeque<Path> files = new ArrayDeque<>();
         int currentFile = 1, stringsInFile = 0;
         BufferedWriter out = Files.newBufferedWriter(folder.resolve(Integer.toString(currentFile)));
         TreeSet<String> strings = new TreeSet<>(comp);
@@ -89,7 +94,7 @@ public class Sort {
     }
 
     static Comparator<? super String> takeComparator(String[] args) {
-        //TODO
+
         return Comparator.naturalOrder();
     }
 
