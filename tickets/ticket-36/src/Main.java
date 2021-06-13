@@ -115,11 +115,11 @@ public class Main {
     }
 
     private void printError(String output) {
-        System.err.printf("%s: %s\n", usageResourceBundle.getString("error"), usageResourceBundle.getString(output));
+        System.err.printf("%s: %s%n", usageResourceBundle.getString("error"), usageResourceBundle.getString(output));
     }
 
     private void printPosition(Position[] positions) {
-        System.out.printf("%s :\n\t%s - `%s`, \n\t%s - `%s`, \n\t%s - `%s`\n",
+        System.out.printf("%s :%n%-20s - `%s`, %n%-20s - `%s`, %n%-20s - `%s`%n",
                 usageResourceBundle.getString("position now"),
                 usageResourceBundle.getString("white king"),
                 positions[0].toString(),
@@ -130,7 +130,7 @@ public class Main {
     }
 
     private void printMove(Move whiteMove) {
-        System.out.printf("%s %s `%s`\n",
+        System.out.printf("%s %s `%s`%n",
                 usageResourceBundle.getString(whiteMove.figure.toString()),
                 usageResourceBundle.getString("moving to"),
                 whiteMove.newPosition.toString().toLowerCase());

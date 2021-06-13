@@ -15,7 +15,9 @@ public class MegaBrain {
     // 4 - король на соседней с ладьей горизонтали
     // 4'- ладья переходит на противоположную сторону,
     //      если белый король подошел к линии горизонта и находится ближе к ладье, чем черный
-    // 5 - дальше обычный алгоритм мата ладьей и королем
+    // 5 - король переходит на другую сторону рядом с ладьей
+    // 6 - король перешел через горизонталь и теперь ладью надо переместить на край
+    // 7 - дальше обычный алгоритм мата ладьей и королем
     int status = 0;
     int direction = 0;
 
@@ -31,7 +33,7 @@ public class MegaBrain {
                 return move;
             }
         }
-        if (status < 5) {
+        if (status < 7) {
             if ((move = mediumStrategy(blackKing)) != null) {
                 return move;
             }
@@ -55,7 +57,7 @@ public class MegaBrain {
             }
         }
         if (status == 1) {
-            if (0 < rook.y && rook.y < 7 && rook.y != king.y && rook.y != blackKing.y) {
+            if (1 < rook.y && rook.y < 6 && rook.y != king.y && rook.y != blackKing.y) {
                 status = 2;
             } else {
                 for (int i = 2; i <= 5; i++) {
@@ -91,8 +93,30 @@ public class MegaBrain {
     }
 
     private Move mediumStrategy(Position blackKing) {
+        if (status == 5) {
+            if (blackKing.y > rook.y) {
+                king.y--;
+            } else {
+                king.y++;
+            }
+            if (king.y != rook.y) {
+                status = 6;
+            }
+            return new Move(Move.Figure.KING, king);
+        }
+        if (status == 6) {
+            if (blackKing.x < 4) {
+                rook.x = 7;
+            } else {
+                rook.x = 0;
+            }
+            status = 7;
+            return new Move(Move.Figure.ROOK, rook);
+        }
+
+
         if (Game.isAttackKings(rook, blackKing)) {
-            return flipRook();
+            return flipRook(blackKing);
         }
 
         if (status == 3) {
@@ -104,19 +128,29 @@ public class MegaBrain {
         }
         if (status == 4) {
             if (readyToFinalStatus(blackKing)) {
-                status = 5;
+                status = 7;
                 direction(blackKing);
             } else {
                 if (Math.abs(rook.x - blackKing.x) > Math.abs(rook.x - king.x)) {
-                    // TODO: проверка на то, опасен ли этот ход для ладьи
-                    return flipRook();
+                    Move move = flipRook(blackKing);
+                    if (move == null) {
+                        if (rook.x == 0) {
+                            rook.x = king.x + 1;
+                        } else {
+                            rook.x = king.x - 1;
+                        }
+                        status = 5;
+                        return new Move(Move.Figure.ROOK, rook);
+                    } else {
+                        return move;
+                    }
                 } else {
                     if (king.y < rook.y) {
                         king.y++;
                     } else {
                         king.y--;
                     }
-                    status = 5;
+                    status = 7;
                     direction(blackKing);
                     return new Move(Move.Figure.KING, king);
                 }
@@ -127,7 +161,7 @@ public class MegaBrain {
 
     private Move finalStrategy(Position blackKing) {
         if (Math.abs(rook.x - blackKing.x) <= 1) {
-            return flipRook();
+            return flipRook(blackKing);
         }
 
         if (Math.abs(rook.y - blackKing.y) > 1) {
@@ -193,7 +227,6 @@ public class MegaBrain {
                 return new Move(Move.Figure.KING, king);
             }
         }
-        int r = 1;
         if (rook.x == 0) {
             king.x--;
         } else {
@@ -202,10 +235,16 @@ public class MegaBrain {
         return new Move(Move.Figure.KING, king);
     }
 
-    private Move flipRook() {
+    private Move flipRook(Position blackKing) {
         if (rook.x == 0) {
+            if (Game.isAttackKings(new Position(7, rook.y), blackKing)) {
+                return null;
+            }
             rook.x = 7;
         } else if (rook.x == 7) {
+            if (Game.isAttackKings(new Position(0, rook.y), blackKing)) {
+                return null;
+            }
             rook.x = 0;
         } else {
             throw new IllegalArgumentException("In flipRook rook.x not right");
