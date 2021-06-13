@@ -1,12 +1,7 @@
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
-public class Bag<T> implements Collection<T> {
+public class Bag<T> extends AbstractCollection<T> {
 
     private Map<T, Union<T>> elements;
 
@@ -82,12 +77,12 @@ public class Bag<T> implements Collection<T> {
 
     @Override
     public boolean contains(Object o) {
-        return elements.entrySet().contains(o);
+        return elements.containsKey(o);
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        return elements.entrySet().containsAll(c);
+        return elements.keySet().containsAll(c);
     }
 
     @Override
@@ -156,7 +151,7 @@ public class Bag<T> implements Collection<T> {
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        return c.stream().allMatch(el -> remove(el));
+        return c.stream().allMatch(this::remove);
     }
 
     @Override
@@ -180,7 +175,7 @@ public class Bag<T> implements Collection<T> {
     @Override
     public <T> T[] toArray(T[] a) {
         Object[] ar = toArray();
-        System.arraycopy(ar, 0, a, 0, a.length > ar.length ? ar.length : a.length);
+        System.arraycopy(ar, 0, a, 0, Math.min(a.length, ar.length));
         return a;
     }
     
