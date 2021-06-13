@@ -75,4 +75,29 @@ public class Game {
             return color == WHITE ? BLACK : WHITE;
         }
     }
+
+    public String draw() {
+        StringBuilder sb = new StringBuilder();
+        for (int y = 7; y >= 0; y--) {
+            sb.append("  +--+--+--+--+--+--+--+--+\n");
+            sb.append(y + 1).append(" ");
+            for (int x = 0; x < 8; x++) {
+                sb.append("|");
+                Position cell = new Position(x, y);
+                if (cell.equals(whiteKing)) {
+                    sb.append("♔");
+                } else if (cell.equals(blackKing)) {
+                    sb.append("♚");
+                } else if (cell.equals(whiteRook)) {
+                    sb.append("♖");
+                } else {
+                    sb.append("  ");
+                }
+            }
+            sb.append("|\n");
+        }
+        sb.append("  +--+--+--+--+--+--+--+--+\n");
+        sb.append("   a  b  c  d  e  f  g  h \n");
+        return sb.toString();
+    }
 }

@@ -107,7 +107,8 @@ public class MegaBrain {
                 status = 5;
                 direction(blackKing);
             } else {
-                if (Math.abs(rook.x - blackKing.x) > Math.abs(rook.x - blackKing.x)) {
+                if (Math.abs(rook.x - blackKing.x) > Math.abs(rook.x - king.x)) {
+                    // TODO: проверка на то, опасен ли этот ход для ладьи
                     return flipRook();
                 } else {
                     if (king.y < rook.y) {

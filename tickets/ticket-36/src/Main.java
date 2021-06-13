@@ -33,10 +33,13 @@ public class Main {
 
             if (game.isFinished()) {
                 print("game over");
+                System.out.println(game.draw());
                 return;
             }
 
             printPosition(positions);
+            System.out.println(game.draw());
+
             Position oldPosition = game.getBlackKingPosition();
             do {
                 readFigure("black' king", positions, 2);
