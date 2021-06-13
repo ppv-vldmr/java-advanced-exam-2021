@@ -1,16 +1,19 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.rmi.RemoteException;
 import java.util.Scanner;
 
 public class GUI {
     public static void main(String[] args) {
         try {
-            Scanner scanner = new Scanner(System.in);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             Manager server = Client.serverLookup();
             if (server == null) {
                 return;
             }
             String s;
-            while (!(s = scanner.nextLine()).equals("q")) {
+            while (!(s = reader.readLine()).equals("q")) {
                 try {
                     Client.processArgs(server, s.split(" "));
                 } catch (IllegalArgumentException e) {
@@ -19,8 +22,8 @@ public class GUI {
                     System.out.println("Unknown operation");
                 }
             }
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            System.err.println("Critical exception");
         }
     }
 }
