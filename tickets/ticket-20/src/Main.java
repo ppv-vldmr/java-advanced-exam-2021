@@ -5,8 +5,8 @@ public class Main {
 
     private static final int NUMBER_OF_ELEMENTS = 10;
     private static final int NUMBER_OF_ITERATION = 20;
-    private static final int MAX_SLEEP_FIRST_THREAD = 1200;
-    private static final int SLEEP_SECOND_THREAD = 1000;
+    private static final int MAX_SLEEP_FIRST_THREAD = 800;
+    private static final int SLEEP_SECOND_THREAD = 700;
 
     private static Thread getFirstThread(MyConcurrentQueue<Integer> queue) {
         return new Thread(() -> {
@@ -15,7 +15,7 @@ public class Main {
                 try {
                     Thread.sleep(Math.abs(random.nextInt()) % MAX_SLEEP_FIRST_THREAD);
                     queue.add(i);
-                    System.out.println("First thread add to queue element " + i + ". Current elements : " + queue.size());
+                    printMessage("First thread add to queue element " + i + ". Current elements : " + queue.size());
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
@@ -29,13 +29,19 @@ public class Main {
             for (int i = 0; i < NUMBER_OF_ITERATION; i++) {
                 try {
                     Thread.sleep(SLEEP_SECOND_THREAD);
-                    System.out.println("Second thread removed an element from queue: " + queue.remove() + ". Current elements: " + queue.size());
+                    printMessage("Second thread removed an element from queue: " + queue.remove() + ". Current elements: " + queue.size());
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
                 }
             }
         });
+    }
+
+    private static void printMessage(String message) {
+        synchronized (System.out) {
+            System.out.println(message);
+        }
     }
 
     private static void startThreads(List<Thread> threadList) {

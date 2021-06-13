@@ -44,8 +44,6 @@ public class MyConcurrentQueue<E> {
     }
 
     public int size() {
-        synchronized (this) {
-            return currentNumbersOfElements;
-        }
+        return currentNumbersOfElements;
     }
 }
