@@ -9,8 +9,7 @@ public class Bag<T> extends AbstractCollection<T> {
         elements = new HashMap<>();
     }
 
-
-
+    // a
     public Bag(Collection<T> coll) {
         this();
         addAll(coll);
