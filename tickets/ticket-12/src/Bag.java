@@ -3,7 +3,7 @@ import java.util.stream.Stream;
 
 public class Bag<T> extends AbstractCollection<T> {
 
-    private Map<T, Union<T>> elements;
+    private final Map<T, Union<T>> elements;
 
     public Bag() {
         elements = new HashMap<>();
@@ -15,11 +15,9 @@ public class Bag<T> extends AbstractCollection<T> {
     }
 
     private static class Union<T> {
-        private Deque<T> elements;
+        private final Deque<T> elements = new ArrayDeque<>();
 
-        Union() {
-            elements = new ArrayDeque<>();
-        }
+        Union() { }
 
         T delegate() {
             if (!elements.isEmpty()) {
@@ -66,7 +64,7 @@ public class Bag<T> extends AbstractCollection<T> {
 
     @Override
     public boolean addAll(Collection<? extends T> coll) {
-        coll.stream().forEach(this::add);
+        coll.forEach(this::add);
         return true;
     }
 
@@ -91,9 +89,9 @@ public class Bag<T> extends AbstractCollection<T> {
     }
 
     private static class BagIterator<T> implements Iterator<T> {
-        Iterator<Union<T>> it;
-        Iterator<T> unionIterator;
-        Union<T> currUnion;
+        private Iterator<Union<T>> it;
+        private Iterator<T> unionIterator;
+        private Union<T> currUnion;
         
         BagIterator(Bag<T> bag) {
             this.it = bag.elements.values().iterator();
@@ -151,7 +149,9 @@ public class Bag<T> extends AbstractCollection<T> {
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        return c.stream().allMatch(this::remove);
+        int startSize = size();
+        c.forEach(this::remove);
+        return startSize - size() == c.size();
     }
 
     @Override
@@ -173,7 +173,7 @@ public class Bag<T> extends AbstractCollection<T> {
     }
 
     @Override
-    public <T> T[] toArray(T[] a) {
+    public <U> U[] toArray(U[] a) {
         Object[] ar = toArray();
         System.arraycopy(ar, 0, a, 0, Math.min(a.length, ar.length));
         return a;
