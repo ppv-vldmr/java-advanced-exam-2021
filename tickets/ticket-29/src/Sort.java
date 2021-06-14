@@ -1,11 +1,28 @@
 import java.io.*;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.function.Consumer;
 
 public class Sort {
-    private static final int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 128;
+
+    private static final SimpleFileVisitor<Path> DELETE =new SimpleFileVisitor<Path>() {
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            Files.delete(file);
+            return super.visitFile(file, attrs);
+        }
+
+        @Override
+        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+            Files.delete(dir);
+            return super.postVisitDirectory(dir, exc);
+        }
+    };
 
     Path make_name(Path folder, int num) {
         return folder.resolve(Integer.toString(num));
@@ -22,7 +39,7 @@ public class Sort {
                 strs[ind] = null;
             }
         };
-        while (Arrays.stream(strs).allMatch(Objects::isNull)) {
+        while (!Arrays.stream(strs).allMatch(Objects::isNull)) {
             switch (Integer.signum(nullComparator.compare(strs[0], strs[1]))) {
                 case -1 -> next.accept(0);
                 case 0 -> {
@@ -32,6 +49,9 @@ public class Sort {
                 case 1 -> next.accept(1);
             }
         }
+        ins[0].close();
+        ins[1].close();
+        out.close();
     }
 
     Sort(Comparator<? super String> comp, BufferedReader in, PrintStream out, PrintStream err) {
@@ -49,11 +69,17 @@ public class Sort {
                         Files.newBufferedReader(file1),
                         Files.newBufferedReader(file2)
                 }, tempPrintStream, comp);
+                Files.delete(file1);
+                Files.delete(file2);
             }
             BufferedReader outReader = Files.newBufferedReader(files.poll());
             String str;
             while ((str = outReader.readLine()) != null)
                 out.println(str);
+            in.close();
+            err.close();
+            out.close();
+            Files.walkFileTree(folder,DELETE);
         } catch (IOException e) {
             err.println(e.getMessage());
         }
@@ -62,7 +88,7 @@ public class Sort {
     ArrayDeque<Path> cut(BufferedReader in, Path folder, Comparator<? super String> comp) throws IOException {
         String str;
         ArrayDeque<Path> files = new ArrayDeque<>();
-        int currentFile = 1, stringsInFile = 0;
+        int currentFile = 0, stringsInFile = 0;
         BufferedWriter out = Files.newBufferedWriter(folder.resolve(Integer.toString(currentFile)));
         TreeSet<String> strings = new TreeSet<>(comp);
         while ((str = in.readLine()) != null) {
@@ -75,7 +101,6 @@ public class Sort {
                 out.close();
 
                 files.add(make_name(folder, currentFile++));
-                currentFile++;
                 stringsInFile = 0;
 
                 out = Files.newBufferedWriter(make_name(folder, currentFile));
@@ -132,9 +157,9 @@ public class Sort {
             String[] elements = s.split("=");
             try {
                 switch (elements[0]) {
-                    case "out" -> out = new PrintStream(new FileOutputStream(elements[1]));
+                    case "out" -> out = new PrintStream(new FileOutputStream(Path.of(elements[1]).toFile()));
                     case "in" -> reader = Files.newBufferedReader(Path.of(elements[1]));
-                    case "err" -> err = new PrintStream(new FileOutputStream(elements[1]));
+                    case "err" -> err = new PrintStream(new FileOutputStream(Path.of(elements[1]).toFile()));
                 }
             } catch (IOException e) {
                 System.err.println("Problems : \n" + e.getMessage());
