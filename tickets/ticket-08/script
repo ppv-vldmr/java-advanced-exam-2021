@@ -1,0 +1,9 @@
+dir
+rm test_file
+cd test-dir
+dir
+create aaaa
+dir
+cd ..
+rmdir test-dir
+dir
