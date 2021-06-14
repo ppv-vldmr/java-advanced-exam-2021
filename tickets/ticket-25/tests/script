@@ -1,0 +1,8 @@
+add tests/list.md
+print incomplete actual/incomplete.md
+print complete actual/complete.md
+print all actual/all.md
+add java ticket-25
+mark java
+delete breakfast
+print all

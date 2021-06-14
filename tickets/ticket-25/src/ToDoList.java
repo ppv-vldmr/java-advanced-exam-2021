@@ -15,20 +15,20 @@ public class ToDoList {
         to.put("all", MODE.ALL);
     }
 
-    void print(MODE arg, PrintStream out, boolean mark) {
+    void print(MODE arg, PrintStream out, PrintStream err, boolean mark) {
         switch (arg) {
             case INCOMPLETE -> incompleteTasks.forEach((label, task) -> out.format("* %s : %s\n", label, task));
             case COMPLETE -> completeTasks.forEach((label, task) -> out.format(mark ? "* ~~%s : %s~~\n" : "* %s : %s\n", label, task));
             case ALL -> {
-                print(MODE.COMPLETE, out, true);
-                print(MODE.INCOMPLETE, out, true);
+                print(MODE.COMPLETE, out, err,true);
+                print(MODE.INCOMPLETE, out, err,true);
             }
-            default -> System.err.format("Unsupported label - %s\n", arg);
+            default -> err.format("Unsupported label - %s\n", arg);
         }
     }
 
-    void run() {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(System.in))) {
+    public void run(InputStream inputStream, PrintStream out, PrintStream err) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             String[] lexemes;
             while ((line = in.readLine()) != null) {
@@ -41,8 +41,9 @@ public class ToDoList {
                                     String record;
                                     while ((record = fileIn.readLine()) != null) {
                                         String[] words = record.split("/* ~~| : |~~|/* ");
-                                        if (record.endsWith("~~")) completeTasks.put(words[0], words[1]);
-                                        else incompleteTasks.put(words[0], words[1]);
+                                        String task = Arrays.stream(words).skip(2).collect(Collectors.joining(" "));
+                                        if (record.endsWith("~~")) completeTasks.put(words[1], task);
+                                        else incompleteTasks.put(words[1], task);
                                     }
                                 }
                             } else {
@@ -51,30 +52,30 @@ public class ToDoList {
 
                         }
                         case "mark" -> {
-                            if (lexemes.length == 1) System.err.format("Must be two words");
+                            if (lexemes.length == 1) err.format("Must be two words");
                             String task;
                             if ((task = incompleteTasks.remove(lexemes[1])) != null) {
                                 completeTasks.put(lexemes[1], task);
                             }
                         }
                         case "delete" -> {
-                            if (lexemes.length == 1) System.err.format("Must be two words");
+                            if (lexemes.length == 1) err.format("Must be two words");
                             completeTasks.remove(lexemes[1]);
                             incompleteTasks.remove(lexemes[1]);
                         }
                         case "print" -> {
-                            PrintStream out = System.out;
-                            if (lexemes.length == 3) out = new PrintStream(new FileOutputStream(lexemes[2]));
-                            print(to.get(lexemes[1]), out, false);
+                            PrintStream tempOut = out;
+                            if (lexemes.length == 3) tempOut = new PrintStream(new FileOutputStream(lexemes[2]));
+                            print(to.get(lexemes[1]), tempOut, err, false);
                         }
-                        default -> System.err.format("Unsupported operation : %s\n", lexemes[0]);
+                        default -> err.format("Unsupported operation : %s\n", lexemes[0]);
                     }
                 }catch (ArrayIndexOutOfBoundsException e){
-                    System.err.println("Must be more words");
+                    err.println("Must be more words");
                 }
             }
         } catch (IOException e) {
-            System.err.println("Problems with input :");
+            err.println("Problems with input :");
             e.printStackTrace();
         } catch (NullPointerException ignored) {}
     }
@@ -85,6 +86,6 @@ public class ToDoList {
     }
 
     public static void main(String[] args) {
-        new ToDoList().run();
+        new ToDoList().run(System.in,System.out,System.err);
     }
 }
