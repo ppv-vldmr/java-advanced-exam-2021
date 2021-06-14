@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="UTF8">
+	</head>
+	<body>
+		<h1>
+			Hello
+		</h1>
+		<h2>
+			Second Hello
+		</h2>
+		<h4>
+			It's not okey
+		</h4>
+		<p>
+			<hr>
+		</p>
+		<p>
+			<em>It's my site</em>
+		</p>
+		<p>
+			About me:
+			<ul>
+				<li><u>Name</u></li>
+				<li><strong><em>Last Name</em></strong></li>
+				<li><em>Date</em>:
+				<ol>
+					<li><em>h</em></li>
+					<li><strong>m</strong></li>
+					<li><s>s</s></li>
+				</ol>
+				</li>
+			</ul>
+		</p>
+		<p>
+			<strong>Thank you!</strong>
+		</p>
+		<h2>
+			Good bue!
+		</h2>
+	</body>
+</html>
