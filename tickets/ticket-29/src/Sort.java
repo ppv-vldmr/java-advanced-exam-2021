@@ -9,8 +9,26 @@ import java.util.function.Consumer;
 
 public class Sort {
     private static final int BUFFER_SIZE = 128;
+    private static final Map<String,Comparator<String>> mapToComparator = new HashMap<>();
 
-    private static final SimpleFileVisitor<Path> DELETE =new SimpleFileVisitor<Path>() {
+    static {
+        mapToComparator.put("--ignore-case",String::compareToIgnoreCase);
+        mapToComparator.put("--dictionary-order",Comparator.comparing(s -> s.replaceAll("[^\\da-zA-Zа-яёА-ЯЁ ]", "")));
+        mapToComparator.put("--ignore-leading-blanks", Comparator.comparing(String::stripLeading));
+        mapToComparator.put("--ignore-non-printing",Comparator.comparing(s -> s.replaceAll("[^\\p{ASCII}]", "")));
+        mapToComparator.put("--numeric-sort" ,Comparator.comparingLong(Long::parseLong));
+        mapToComparator.put("--general-numeric-sort",Comparator.comparingDouble(Double::valueOf));
+    }
+
+    static Comparator<? super String> takeComparator(ArrayList<String> options) {
+        // TODO пересмотрите эту функцию, почти наверняка я где-то набагал
+        Comparator<String> ans = Comparator.naturalOrder();
+
+        return options.contains("--reverse") ? ans.reversed() : ans;
+    }
+
+
+    private static final SimpleFileVisitor<Path> DELETE = new SimpleFileVisitor<>() {
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
             Files.delete(file);
@@ -65,6 +83,7 @@ public class Sort {
                 Path file1 = files.poll(), file2 = files.poll(), tempOut = make_name(folder, current++);
                 files.add(tempOut);
                 PrintStream tempPrintStream = new PrintStream(new FileOutputStream(tempOut.toFile()));
+                assert file2 != null;
                 merge(new BufferedReader[]{
                         Files.newBufferedReader(file1),
                         Files.newBufferedReader(file2)
@@ -72,7 +91,7 @@ public class Sort {
                 Files.delete(file1);
                 Files.delete(file2);
             }
-            BufferedReader outReader = Files.newBufferedReader(files.poll());
+            BufferedReader outReader = Files.newBufferedReader(Objects.requireNonNull(files.poll()));
             String str;
             while ((str = outReader.readLine()) != null)
                 out.println(str);
@@ -92,7 +111,7 @@ public class Sort {
         BufferedWriter out = Files.newBufferedWriter(folder.resolve(Integer.toString(currentFile)));
         TreeSet<String> strings = new TreeSet<>(comp);
         while ((str = in.readLine()) != null) {
-            if (stringsInFile == BUFFER_SIZE - 1) {
+            if (strings.size() == BUFFER_SIZE - 1) {
                 for (String string : strings) {
                     out.write(string);
                     out.newLine();
@@ -101,44 +120,27 @@ public class Sort {
                 out.close();
 
                 files.add(make_name(folder, currentFile++));
-                stringsInFile = 0;
 
                 out = Files.newBufferedWriter(make_name(folder, currentFile));
                 strings.clear();
             } else {
                 strings.add(str);
-                stringsInFile++;
             }
         }
+        if(strings.size()>0) {
+            boolean first = true;
+            for (String string : strings) {
+                if (!first) {
+                    out.write('\n');
+                }
+                if(first) first=false;
+                out.write(string);
+            }
+            out.close();
+            files.add(make_name(folder, currentFile));
+            strings.clear();
+        }
         return files;
-    }
-
-    static Comparator<? super String> takeComparator(ArrayList<String> options) {
-        // TODO пересмотрите эту функцию, почти наверняка я где-то набагал
-        Comparator<String> ans = Comparator.naturalOrder();
-        if(options.contains("--ignore-case")) {
-            ans = String::compareToIgnoreCase;
-        }
-        if(options.contains("--dictionary-order")) {
-            ans = Comparator.comparing(s -> s.replaceAll("[^\\da-zA-Zа-яёА-ЯЁ ]", ""));
-        }
-        if(options.contains("--ignore-leading-blanks")) {
-            ans = Comparator.comparing(String::stripLeading);
-        }
-        if(options.contains("--numeric-sort")) {
-            ans = Comparator.comparingLong(Long::parseLong);
-            Comparator<String> temp=ans;
-            ans.thenComparing(temp);
-        }
-        if(options.contains("--ignore-non-printing")) {
-            ans = Comparator.comparing(s -> s.replaceAll("[^\\p{ASCII}]", ""));
-        }
-        if(options.contains("--general-numeric-sort") && options.contains("--numeric-sort")) {
-            ans = Comparator.comparingDouble(Double::valueOf);
-            Comparator<String> temp=ans;
-            ans.thenComparing(temp);
-        }
-        return options.contains("--reverse") ? ans.reversed() : ans;
     }
 
     public static void main(String[] args) {
