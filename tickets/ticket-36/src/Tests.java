@@ -29,6 +29,12 @@ public class Tests {
                 System.out.println("FINISHED:\n" + game.draw());
                 return;
             }
+
+            if (!game.isMoving()) {
+                System.out.println("DRAW:\n" + game.draw());
+                return;
+            }
+
             Random r = new Random();
             int x, y;
             Position p;
@@ -85,6 +91,36 @@ public class Tests {
         pos[0] = new Position("g5");
         pos[1] = new Position("h8");
         pos[2] = new Position("g3");
+
+        randomTest(pos);
+    }
+
+    @Test
+    void randomTest05() {
+        Position[] pos = new Position[3];
+        pos[0] = new Position("a1");
+        pos[1] = new Position("a2");
+        pos[2] = new Position("c1");
+
+        randomTest(pos);
+    }
+
+    @Test
+    void randomTest06() {
+        Position[] pos = new Position[3];
+        pos[0] = new Position("c1");
+        pos[1] = new Position("c2");
+        pos[2] = new Position("a1");
+
+        randomTest(pos);
+    }
+
+    @Test
+    void randomTest07() {
+        Position[] pos = new Position[3];
+        pos[0] = new Position("c1");
+        pos[1] = new Position("d1");
+        pos[2] = new Position("a1");
 
         randomTest(pos);
     }

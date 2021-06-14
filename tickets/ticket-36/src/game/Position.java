@@ -1,6 +1,7 @@
 package game;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class Position {
     public int x, y;
@@ -11,10 +12,14 @@ public class Position {
     }
 
     public Position(String pos) {
-        if (pos.matches("[a-h][1-8]")) {
+        if (isPosition(pos)) {
             x = pos.charAt(0) - 'a';
             y = pos.charAt(1) - '1';
         }
+    }
+
+    public static boolean isPosition(String input) {
+    return Pattern.matches("[a-h][1-8]", input);
     }
 
     @Override

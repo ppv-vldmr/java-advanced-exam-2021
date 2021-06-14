@@ -25,7 +25,7 @@ public class Game {
         return isAttackRookAndKing(blackKing, whiteRook) && !isMoving();
     }
 
-    private boolean isMoving() {
+    public boolean isMoving() {
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
                 Position pos = new Position(blackKing.x + dx, blackKing.y + dy);

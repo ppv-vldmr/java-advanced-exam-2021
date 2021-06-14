@@ -37,6 +37,12 @@ public class Main {
                 return;
             }
 
+            if (!game.isMoving()) {
+                print("draw");
+                System.out.println(game.draw());
+                return;
+            }
+
             printPosition(positions);
             System.out.println(game.draw());
 
@@ -77,7 +83,7 @@ public class Main {
     }
 
     private boolean isCorrectPosition(String input, Position[] positions, int i) {
-        if (!Pattern.matches("[a-h][1-8]", input)) {
+        if (!Position.isPosition(input)) {
             printError("pos format");
             return false;
         }

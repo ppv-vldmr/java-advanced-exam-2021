@@ -164,6 +164,12 @@ public class MegaBrain {
             return flipRook(blackKing);
         }
 
+        if (rook.y > blackKing.y) {
+            direction = -1;
+        } else {
+            direction = 1;
+        }
+
         if (Math.abs(rook.y - blackKing.y) > 1) {
             rook.y = blackKing.y - direction;
             return new Move(Move.Figure.ROOK, rook);
