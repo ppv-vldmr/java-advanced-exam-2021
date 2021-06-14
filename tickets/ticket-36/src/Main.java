@@ -49,7 +49,7 @@ public class Main {
             Position oldPosition = game.getBlackKingPosition();
             do {
                 readFigure("black' king", positions, 2);
-            } while (isIncorrectBlackKingPosition(positions) || !isMoveCorrect(positions[2], oldPosition));
+            } while (!isMoveCorrect(positions[2], oldPosition) || isIncorrectBlackKingPosition(positions));
             game.blackMove(positions[2]);
         }
     }

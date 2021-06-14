@@ -122,6 +122,9 @@ public class MegaBrain {
         if (status == 3) {
             if (Math.abs(king.y - rook.y) == 1) {
                 status = 4;
+                if (Math.abs(blackKing.y - rook.y) <= 3) {
+                    return flipRook(blackKing);
+                }
             } else {
                 return moveKingToRookHor(blackKing);
             }
@@ -164,11 +167,7 @@ public class MegaBrain {
             return flipRook(blackKing);
         }
 
-        if (rook.y > blackKing.y) {
-            direction = -1;
-        } else {
-            direction = 1;
-        }
+        direction(blackKing);
 
         if (Math.abs(rook.y - blackKing.y) > 1) {
             rook.y = blackKing.y - direction;
