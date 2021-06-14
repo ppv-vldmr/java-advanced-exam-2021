@@ -98,14 +98,20 @@ public class Sort {
             ans = Comparator.comparing(s -> s.replaceAll("[^\\da-zA-Zа-яёА-ЯЁ ]", ""));
         }
         if(options.contains("--ignore-leading-blanks")) {
-            ans = Comparator.comparing(s -> s.replaceAll("[ ]", ""));
+            ans = Comparator.comparing(String::stripLeading);
         }
         if(options.contains("--numeric-sort")) {
-            Comparator<String> temp= Comparator.comparing(n -> Long.parseLong(String.valueOf(n)));
-            temp.thenComparing(ans);
+            ans = Comparator.comparingLong(Long::parseLong);
+            Comparator<String> temp=ans;
+            ans.thenComparing(temp);
         }
-        if(options.contains("--general-numeric-sort")) {
-            ans= Comparator.comparing(n -> Long.parseLong(String.valueOf(n)));
+        if(options.contains("--ignore-non-printing")) {
+            ans = Comparator.comparing(s -> s.replaceAll("[^\\p{ASCII}]", ""));
+        }
+        if(options.contains("--general-numeric-sort") && options.contains("--numeric-sort")) {
+            ans = Comparator.comparingDouble(Double::valueOf);
+            Comparator<String> temp=ans;
+            ans.thenComparing(temp);
         }
         return options.contains("--reverse") ? ans.reversed() : ans;
     }
