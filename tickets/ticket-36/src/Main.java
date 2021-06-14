@@ -55,6 +55,10 @@ public class Main {
     }
 
     private boolean isMoveCorrect(Position a, Position b) {
+        if (a.x == b.x && a.y == b.y) {
+            printError("not move");
+            return false;
+        }
         if (Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)) != 1) {
             printError("wrong move");
             return false;

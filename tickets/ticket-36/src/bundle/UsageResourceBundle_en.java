@@ -21,6 +21,7 @@ public class UsageResourceBundle_en extends ListResourceBundle {
             {"king", "king"},
             {"rook", "rook"},
             {"wrong move", "king cannot moving more than one cell"},
+            {"not move", "king cannot stay on cell. Please, write correct move"},
             {"white king", "white king"},
             {"white rook", "white rook"},
             {"black king", "black king"},

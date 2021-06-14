@@ -18,6 +18,7 @@ public class UsageResourceBundle_ru extends ListResourceBundle {
             {"king", "король"},
             {"rook", "ладья"},
             {"wrong move", "король не может ходить больше, чем на одну клетку"},
+            {"not move", "король не может не ходить. Пожалуйста, введите корректный ход"},
             {"white king", "белый король"},
             {"white rook", "белой ладья"},
             {"black king", "черный король"},
